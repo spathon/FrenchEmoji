@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>French Emoji — Apprends le français avec des émojis</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #002395, #fff, #ed2939);
+    padding: 2rem 1rem 1.5rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    color: #1a1a2e;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+  }
+  header p {
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    color: #333;
+  }
+  .search-wrap {
+    max-width: 420px;
+    margin: 1.2rem auto 0;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus {
+    border-color: #002395;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+    max-width: 1200px;
+    margin: 1.5rem auto;
+    padding: 0 1rem 2rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    user-select: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  }
+  .card:active {
+    transform: scale(0.96);
+  }
+  .card .emoji {
+    font-size: 2.8rem;
+    line-height: 1.2;
+  }
+  .card .label {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+  }
+  .card.speaking {
+    outline: 3px solid #002395;
+    outline-offset: -3px;
+  }
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #888;
+    font-size: 1.1rem;
+  }
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+    .card .emoji { font-size: 2.2rem; }
+    .card .label { font-size: 0.75rem; }
+    header h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>French Emoji</h1>
+  <p>Clique sur un émoji pour entendre sa prononciation en français</p>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Rechercher..." autocomplete="off">
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+const emojis = [
+  // Fruits
+  ["🍎","la pomme"],["🍐","la poire"],["🍊","l'orange"],["🍋","le citron"],
+  ["🍌","la banane"],["🍉","la pastèque"],["🍇","le raisin"],["🍓","la fraise"],
+  ["🫐","la myrtille"],["🍒","la cerise"],["🍑","la pêche"],["🥭","la mangue"],
+  ["🍍","l'ananas"],["🥥","la noix de coco"],["🥝","le kiwi"],["🍈","le melon"],
+
+  // Légumes
+  ["🥕","la carotte"],["🌽","le maïs"],["🥦","le brocoli"],["🥒","le concombre"],
+  ["🍅","la tomate"],["🥬","la laitue"],["🧅","l'oignon"],["🧄","l'ail"],
+  ["🥔","la pomme de terre"],["🍆","l'aubergine"],["🌶️","le piment"],["🥑","l'avocat"],
+  ["🫑","le poivron"],["🍄","le champignon"],
+
+  // Nourriture
+  ["🍞","le pain"],["🥐","le croissant"],["🥖","la baguette"],["🧀","le fromage"],
+  ["🥚","l'œuf"],["🍳","l'œuf au plat"],["🥞","la crêpe"],["🧇","la gaufre"],
+  ["🥩","la viande"],["🍗","le poulet"],["🍖","la côtelette"],["🌭","le hot-dog"],
+  ["🍔","le hamburger"],["🍟","les frites"],["🍕","la pizza"],["🥗","la salade"],
+  ["🍝","les pâtes"],["🍜","la soupe"],["🍣","le sushi"],["🍩","le beignet"],
+  ["🍪","le biscuit"],["🎂","le gâteau"],["🍰","la part de gâteau"],["🍫","le chocolat"],
+  ["🍬","le bonbon"],["🍭","la sucette"],["🍦","la glace"],["☕","le café"],
+  ["🍵","le thé"],["🥛","le lait"],["🍷","le vin"],["🍺","la bière"],
+  ["🧃","le jus de fruit"],["🥤","la boisson"],["💧","l'eau"],
+
+  // Animaux
+  ["🐶","le chien"],["🐱","le chat"],["🐭","la souris"],["🐹","le hamster"],
+  ["🐰","le lapin"],["🦊","le renard"],["🐻","l'ours"],["🐼","le panda"],
+  ["🐨","le koala"],["🐯","le tigre"],["🦁","le lion"],["🐮","la vache"],
+  ["🐷","le cochon"],["🐸","la grenouille"],["🐵","le singe"],["🐔","la poule"],
+  ["🐧","le pingouin"],["🐦","l'oiseau"],["🦆","le canard"],["🦅","l'aigle"],
+  ["🦉","le hibou"],["🐴","le cheval"],["🦄","la licorne"],["🐝","l'abeille"],
+  ["🐛","la chenille"],["🦋","le papillon"],["🐌","l'escargot"],["🐞","la coccinelle"],
+  ["🐢","la tortue"],["🐍","le serpent"],["🦎","le lézard"],["🐙","la pieuvre"],
+  ["🦀","le crabe"],["🐟","le poisson"],["🐬","le dauphin"],["🐳","la baleine"],
+  ["🦈","le requin"],["🐊","le crocodile"],["🦒","la girafe"],["🐘","l'éléphant"],
+  ["🦏","le rhinocéros"],["🐪","le chameau"],["🐺","le loup"],["🦔","le hérisson"],
+
+  // Nature et météo
+  ["🌸","la fleur de cerisier"],["🌹","la rose"],["🌻","le tournesol"],["🌷","la tulipe"],
+  ["🌳","l'arbre"],["🌲","le sapin"],["🍀","le trèfle"],["🍁","la feuille d'érable"],
+  ["🍂","les feuilles mortes"],["🌍","la terre"],["🌙","la lune"],["⭐","l'étoile"],
+  ["☀️","le soleil"],["🌤️","le beau temps"],["⛅","les nuages"],["🌧️","la pluie"],
+  ["⛈️","l'orage"],["❄️","la neige"],["🌈","l'arc-en-ciel"],["💨","le vent"],
+  ["🌊","la vague"],["🔥","le feu"],["⚡","l'éclair"],
+
+  // Transport
+  ["🚗","la voiture"],["🚕","le taxi"],["🚌","le bus"],["🚑","l'ambulance"],
+  ["🚒","le camion de pompiers"],["🚲","le vélo"],["🛵","le scooter"],["🚂","le train"],
+  ["✈️","l'avion"],["🚀","la fusée"],["🛳️","le bateau"],["🚁","l'hélicoptère"],
+  ["🛶","le canoë"],["⛵","le voilier"],
+
+  // Corps et personnes
+  ["👶","le bébé"],["👦","le garçon"],["👧","la fille"],["👨","l'homme"],
+  ["👩","la femme"],["👴","le grand-père"],["👵","la grand-mère"],
+  ["👀","les yeux"],["👁️","l'œil"],["👃","le nez"],["👂","l'oreille"],
+  ["👄","la bouche"],["🦷","la dent"],["👅","la langue"],["🧠","le cerveau"],
+  ["❤️","le cœur"],["💪","le bras"],["🦶","le pied"],["✋","la main"],
+  ["👆","le doigt"],
+
+  // Objets du quotidien
+  ["📱","le téléphone"],["💻","l'ordinateur"],["⌨️","le clavier"],["🖥️","l'écran"],
+  ["🖨️","l'imprimante"],["📷","l'appareil photo"],["📺","la télévision"],
+  ["🔑","la clé"],["🔒","le cadenas"],["💡","l'ampoule"],["🔦","la lampe torche"],
+  ["📚","les livres"],["📖","le livre"],["✏️","le crayon"],["🖊️","le stylo"],
+  ["✂️","les ciseaux"],["📎","le trombone"],["📏","la règle"],["🗑️","la poubelle"],
+  ["👓","les lunettes"],["🎒","le sac à dos"],["👟","la chaussure"],["👗","la robe"],
+  ["👔","la cravate"],["🧥","le manteau"],["🧤","les gants"],["🧣","l'écharpe"],
+  ["👒","le chapeau"],["☂️","le parapluie"],["💍","la bague"],["⌚","la montre"],
+
+  // Maison
+  ["🏠","la maison"],["🚪","la porte"],["🪟","la fenêtre"],["🛏️","le lit"],
+  ["🛋️","le canapé"],["🪑","la chaise"],["🚿","la douche"],["🛁","la baignoire"],
+  ["🪥","la brosse à dents"],["🧼","le savon"],["🧹","le balai"],["🍽️","l'assiette"],
+  ["🥄","la cuillère"],["🍴","la fourchette"],["🔪","le couteau"],["🥣","le bol"],
+
+  // Musique et loisirs
+  ["🎵","la musique"],["🎸","la guitare"],["🎹","le piano"],["🥁","le tambour"],
+  ["🎺","la trompette"],["🎻","le violon"],["🎤","le microphone"],
+  ["⚽","le football"],["🏀","le basketball"],["🎾","le tennis"],["🏊","la natation"],
+  ["🎿","le ski"],["🚴","le cyclisme"],["🎮","le jeu vidéo"],["🎲","le dé"],
+  ["🧩","le puzzle"],["🎨","la peinture"],["🎭","le théâtre"],["🎬","le cinéma"],
+
+  // Lieux
+  ["🏫","l'école"],["🏥","l'hôpital"],["🏪","le magasin"],["🏛️","le musée"],
+  ["⛪","l'église"],["🏰","le château"],["🗼","la tour"],["🏖️","la plage"],
+  ["🏔️","la montagne"],["🌋","le volcan"],["🏕️","le camping"],
+
+  // Émotions et expressions
+  ["😀","content"],["😢","triste"],["😡","en colère"],["😱","effrayé"],
+  ["😴","fatigué"],["🤔","pensif"],["😍","amoureux"],["🤢","malade"],
+  ["😂","mort de rire"],["🥳","la fête"],
+
+  // Divers
+  ["🕐","l'heure"],["📅","le calendrier"],["🎁","le cadeau"],["🎈","le ballon"],
+  ["🏳️","le drapeau"],["🗺️","la carte"],["💰","l'argent"],["📬","la boîte aux lettres"],
+  ["🧲","l'aimant"],["🔔","la cloche"],["🪴","la plante"],
+];
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+
+function speak(text) {
+  speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'fr-FR';
+  utter.rate = 0.9;
+
+  const voices = speechSynthesis.getVoices();
+  const frVoice = voices.find(v => v.lang.startsWith('fr'));
+  if (frVoice) utter.voice = frVoice;
+
+  return utter;
+}
+
+function render(filter = '') {
+  grid.innerHTML = '';
+  const term = filter.toLowerCase();
+  let count = 0;
+
+  for (const [emoji, label] of emojis) {
+    if (term && !label.toLowerCase().includes(term)) continue;
+    count++;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
+      card.classList.add('speaking');
+      const utter = speak(label);
+      utter.onend = () => card.classList.remove('speaking');
+      speechSynthesis.speak(utter);
+    });
+    grid.appendChild(card);
+  }
+
+  if (count === 0) {
+    grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
+  }
+}
+
+// Load voices (some browsers load them async)
+speechSynthesis.onvoiceschanged = () => {};
+speechSynthesis.getVoices();
+
+searchInput.addEventListener('input', e => render(e.target.value));
+render();
+</script>
+
+</body>
+</html>
