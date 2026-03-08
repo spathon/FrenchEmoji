@@ -76,8 +76,10 @@
     margin-top: 0.4rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #333;
   }
+  .card .label.masc { color: #002395; }
+  .card .label.fem { color: #ed2939; }
+  .card .label.other { color: #555; }
   .card.speaking {
     outline: 3px solid #002395;
     outline-offset: -3px;
@@ -110,102 +112,103 @@
 <div class="grid" id="grid"></div>
 
 <script>
+// [emoji, label, gender] — "m" = masculin (bleu), "f" = féminin (rouge)
 const emojis = [
   // Fruits
-  ["🍎","la pomme"],["🍐","la poire"],["🍊","l'orange"],["🍋","le citron"],
-  ["🍌","la banane"],["🍉","la pastèque"],["🍇","le raisin"],["🍓","la fraise"],
-  ["🫐","la myrtille"],["🍒","la cerise"],["🍑","la pêche"],["🥭","la mangue"],
-  ["🍍","l'ananas"],["🥥","la noix de coco"],["🥝","le kiwi"],["🍈","le melon"],
+  ["🍎","la pomme","f"],["🍐","la poire","f"],["🍊","l'orange","f"],["🍋","le citron","m"],
+  ["🍌","la banane","f"],["🍉","la pastèque","f"],["🍇","le raisin","m"],["🍓","la fraise","f"],
+  ["🫐","la myrtille","f"],["🍒","la cerise","f"],["🍑","la pêche","f"],["🥭","la mangue","f"],
+  ["🍍","l'ananas","m"],["🥥","la noix de coco","f"],["🥝","le kiwi","m"],["🍈","le melon","m"],
 
   // Légumes
-  ["🥕","la carotte"],["🌽","le maïs"],["🥦","le brocoli"],["🥒","le concombre"],
-  ["🍅","la tomate"],["🥬","la laitue"],["🧅","l'oignon"],["🧄","l'ail"],
-  ["🥔","la pomme de terre"],["🍆","l'aubergine"],["🌶️","le piment"],["🥑","l'avocat"],
-  ["🫑","le poivron"],["🍄","le champignon"],
+  ["🥕","la carotte","f"],["🌽","le maïs","m"],["🥦","le brocoli","m"],["🥒","le concombre","m"],
+  ["🍅","la tomate","f"],["🥬","la laitue","f"],["🧅","l'oignon","m"],["🧄","l'ail","m"],
+  ["🥔","la pomme de terre","f"],["🍆","l'aubergine","f"],["🌶️","le piment","m"],["🥑","l'avocat","m"],
+  ["🫑","le poivron","m"],["🍄","le champignon","m"],
 
   // Nourriture
-  ["🍞","le pain"],["🥐","le croissant"],["🥖","la baguette"],["🧀","le fromage"],
-  ["🥚","l'œuf"],["🍳","l'œuf au plat"],["🥞","la crêpe"],["🧇","la gaufre"],
-  ["🥩","la viande"],["🍗","le poulet"],["🍖","la côtelette"],["🌭","le hot-dog"],
-  ["🍔","le hamburger"],["🍟","les frites"],["🍕","la pizza"],["🥗","la salade"],
-  ["🍝","les pâtes"],["🍜","la soupe"],["🍣","le sushi"],["🍩","le beignet"],
-  ["🍪","le biscuit"],["🎂","le gâteau"],["🍰","la part de gâteau"],["🍫","le chocolat"],
-  ["🍬","le bonbon"],["🍭","la sucette"],["🍦","la glace"],["☕","le café"],
-  ["🍵","le thé"],["🥛","le lait"],["🍷","le vin"],["🍺","la bière"],
-  ["🧃","le jus de fruit"],["🥤","la boisson"],["💧","l'eau"],
+  ["🍞","le pain","m"],["🥐","le croissant","m"],["🥖","la baguette","f"],["🧀","le fromage","m"],
+  ["🥚","l'œuf","m"],["🍳","l'œuf au plat","m"],["🥞","la crêpe","f"],["🧇","la gaufre","f"],
+  ["🥩","la viande","f"],["🍗","le poulet","m"],["🍖","la côtelette","f"],["🌭","le hot-dog","m"],
+  ["🍔","le hamburger","m"],["🍟","les frites","f"],["🍕","la pizza","f"],["🥗","la salade","f"],
+  ["🍝","les pâtes","f"],["🍜","la soupe","f"],["🍣","le sushi","m"],["🍩","le beignet","m"],
+  ["🍪","le biscuit","m"],["🎂","le gâteau","m"],["🍰","la part de gâteau","f"],["🍫","le chocolat","m"],
+  ["🍬","le bonbon","m"],["🍭","la sucette","f"],["🍦","la glace","f"],["☕","le café","m"],
+  ["🍵","le thé","m"],["🥛","le lait","m"],["🍷","le vin","m"],["🍺","la bière","f"],
+  ["🧃","le jus de fruit","m"],["🥤","la boisson","f"],["💧","l'eau","f"],
 
   // Animaux
-  ["🐶","le chien"],["🐱","le chat"],["🐭","la souris"],["🐹","le hamster"],
-  ["🐰","le lapin"],["🦊","le renard"],["🐻","l'ours"],["🐼","le panda"],
-  ["🐨","le koala"],["🐯","le tigre"],["🦁","le lion"],["🐮","la vache"],
-  ["🐷","le cochon"],["🐸","la grenouille"],["🐵","le singe"],["🐔","la poule"],
-  ["🐧","le pingouin"],["🐦","l'oiseau"],["🦆","le canard"],["🦅","l'aigle"],
-  ["🦉","le hibou"],["🐴","le cheval"],["🦄","la licorne"],["🐝","l'abeille"],
-  ["🐛","la chenille"],["🦋","le papillon"],["🐌","l'escargot"],["🐞","la coccinelle"],
-  ["🐢","la tortue"],["🐍","le serpent"],["🦎","le lézard"],["🐙","la pieuvre"],
-  ["🦀","le crabe"],["🐟","le poisson"],["🐬","le dauphin"],["🐳","la baleine"],
-  ["🦈","le requin"],["🐊","le crocodile"],["🦒","la girafe"],["🐘","l'éléphant"],
-  ["🦏","le rhinocéros"],["🐪","le chameau"],["🐺","le loup"],["🦔","le hérisson"],
+  ["🐶","le chien","m"],["🐱","le chat","m"],["🐭","la souris","f"],["🐹","le hamster","m"],
+  ["🐰","le lapin","m"],["🦊","le renard","m"],["🐻","l'ours","m"],["🐼","le panda","m"],
+  ["🐨","le koala","m"],["🐯","le tigre","m"],["🦁","le lion","m"],["🐮","la vache","f"],
+  ["🐷","le cochon","m"],["🐸","la grenouille","f"],["🐵","le singe","m"],["🐔","la poule","f"],
+  ["🐧","le pingouin","m"],["🐦","l'oiseau","m"],["🦆","le canard","m"],["🦅","l'aigle","m"],
+  ["🦉","le hibou","m"],["🐴","le cheval","m"],["🦄","la licorne","f"],["🐝","l'abeille","f"],
+  ["🐛","la chenille","f"],["🦋","le papillon","m"],["🐌","l'escargot","m"],["🐞","la coccinelle","f"],
+  ["🐢","la tortue","f"],["🐍","le serpent","m"],["🦎","le lézard","m"],["🐙","la pieuvre","f"],
+  ["🦀","le crabe","m"],["🐟","le poisson","m"],["🐬","le dauphin","m"],["🐳","la baleine","f"],
+  ["🦈","le requin","m"],["🐊","le crocodile","m"],["🦒","la girafe","f"],["🐘","l'éléphant","m"],
+  ["🦏","le rhinocéros","m"],["🐪","le chameau","m"],["🐺","le loup","m"],["🦔","le hérisson","m"],
 
   // Nature et météo
-  ["🌸","la fleur de cerisier"],["🌹","la rose"],["🌻","le tournesol"],["🌷","la tulipe"],
-  ["🌳","l'arbre"],["🌲","le sapin"],["🍀","le trèfle"],["🍁","la feuille d'érable"],
-  ["🍂","les feuilles mortes"],["🌍","la terre"],["🌙","la lune"],["⭐","l'étoile"],
-  ["☀️","le soleil"],["🌤️","le beau temps"],["⛅","les nuages"],["🌧️","la pluie"],
-  ["⛈️","l'orage"],["❄️","la neige"],["🌈","l'arc-en-ciel"],["💨","le vent"],
-  ["🌊","la vague"],["🔥","le feu"],["⚡","l'éclair"],
+  ["🌸","la fleur de cerisier","f"],["🌹","la rose","f"],["🌻","le tournesol","m"],["🌷","la tulipe","f"],
+  ["🌳","l'arbre","m"],["🌲","le sapin","m"],["🍀","le trèfle","m"],["🍁","la feuille d'érable","f"],
+  ["🍂","les feuilles mortes","f"],["🌍","la terre","f"],["🌙","la lune","f"],["⭐","l'étoile","f"],
+  ["☀️","le soleil","m"],["🌤️","le beau temps","m"],["⛅","les nuages","m"],["🌧️","la pluie","f"],
+  ["⛈️","l'orage","m"],["❄️","la neige","f"],["🌈","l'arc-en-ciel","m"],["💨","le vent","m"],
+  ["🌊","la vague","f"],["🔥","le feu","m"],["⚡","l'éclair","m"],
 
   // Transport
-  ["🚗","la voiture"],["🚕","le taxi"],["🚌","le bus"],["🚑","l'ambulance"],
-  ["🚒","le camion de pompiers"],["🚲","le vélo"],["🛵","le scooter"],["🚂","le train"],
-  ["✈️","l'avion"],["🚀","la fusée"],["🛳️","le bateau"],["🚁","l'hélicoptère"],
-  ["🛶","le canoë"],["⛵","le voilier"],
+  ["🚗","la voiture","f"],["🚕","le taxi","m"],["🚌","le bus","m"],["🚑","l'ambulance","f"],
+  ["🚒","le camion de pompiers","m"],["🚲","le vélo","m"],["🛵","le scooter","m"],["🚂","le train","m"],
+  ["✈️","l'avion","m"],["🚀","la fusée","f"],["🛳️","le bateau","m"],["🚁","l'hélicoptère","m"],
+  ["🛶","le canoë","m"],["⛵","le voilier","m"],
 
   // Corps et personnes
-  ["👶","le bébé"],["👦","le garçon"],["👧","la fille"],["👨","l'homme"],
-  ["👩","la femme"],["👴","le grand-père"],["👵","la grand-mère"],
-  ["👀","les yeux"],["👁️","l'œil"],["👃","le nez"],["👂","l'oreille"],
-  ["👄","la bouche"],["🦷","la dent"],["👅","la langue"],["🧠","le cerveau"],
-  ["❤️","le cœur"],["💪","le bras"],["🦶","le pied"],["✋","la main"],
-  ["👆","le doigt"],
+  ["👶","le bébé","m"],["👦","le garçon","m"],["👧","la fille","f"],["👨","l'homme","m"],
+  ["👩","la femme","f"],["👴","le grand-père","m"],["👵","la grand-mère","f"],
+  ["👀","les yeux","m"],["👁️","l'œil","m"],["👃","le nez","m"],["👂","l'oreille","f"],
+  ["👄","la bouche","f"],["🦷","la dent","f"],["👅","la langue","f"],["🧠","le cerveau","m"],
+  ["❤️","le cœur","m"],["💪","le bras","m"],["🦶","le pied","m"],["✋","la main","f"],
+  ["👆","le doigt","m"],
 
   // Objets du quotidien
-  ["📱","le téléphone"],["💻","l'ordinateur"],["⌨️","le clavier"],["🖥️","l'écran"],
-  ["🖨️","l'imprimante"],["📷","l'appareil photo"],["📺","la télévision"],
-  ["🔑","la clé"],["🔒","le cadenas"],["💡","l'ampoule"],["🔦","la lampe torche"],
-  ["📚","les livres"],["📖","le livre"],["✏️","le crayon"],["🖊️","le stylo"],
-  ["✂️","les ciseaux"],["📎","le trombone"],["📏","la règle"],["🗑️","la poubelle"],
-  ["👓","les lunettes"],["🎒","le sac à dos"],["👟","la chaussure"],["👗","la robe"],
-  ["👔","la cravate"],["🧥","le manteau"],["🧤","les gants"],["🧣","l'écharpe"],
-  ["👒","le chapeau"],["☂️","le parapluie"],["💍","la bague"],["⌚","la montre"],
+  ["📱","le téléphone","m"],["💻","l'ordinateur","m"],["⌨️","le clavier","m"],["🖥️","l'écran","m"],
+  ["🖨️","l'imprimante","f"],["📷","l'appareil photo","m"],["📺","la télévision","f"],
+  ["🔑","la clé","f"],["🔒","le cadenas","m"],["💡","l'ampoule","f"],["🔦","la lampe torche","f"],
+  ["📚","les livres","m"],["📖","le livre","m"],["✏️","le crayon","m"],["🖊️","le stylo","m"],
+  ["✂️","les ciseaux","m"],["📎","le trombone","m"],["📏","la règle","f"],["🗑️","la poubelle","f"],
+  ["👓","les lunettes","f"],["🎒","le sac à dos","m"],["👟","la chaussure","f"],["👗","la robe","f"],
+  ["👔","la cravate","f"],["🧥","le manteau","m"],["🧤","les gants","m"],["🧣","l'écharpe","f"],
+  ["👒","le chapeau","m"],["☂️","le parapluie","m"],["💍","la bague","f"],["⌚","la montre","f"],
 
   // Maison
-  ["🏠","la maison"],["🚪","la porte"],["🪟","la fenêtre"],["🛏️","le lit"],
-  ["🛋️","le canapé"],["🪑","la chaise"],["🚿","la douche"],["🛁","la baignoire"],
-  ["🪥","la brosse à dents"],["🧼","le savon"],["🧹","le balai"],["🍽️","l'assiette"],
-  ["🥄","la cuillère"],["🍴","la fourchette"],["🔪","le couteau"],["🥣","le bol"],
+  ["🏠","la maison","f"],["🚪","la porte","f"],["🪟","la fenêtre","f"],["🛏️","le lit","m"],
+  ["🛋️","le canapé","m"],["🪑","la chaise","f"],["🚿","la douche","f"],["🛁","la baignoire","f"],
+  ["🪥","la brosse à dents","f"],["🧼","le savon","m"],["🧹","le balai","m"],["🍽️","l'assiette","f"],
+  ["🥄","la cuillère","f"],["🍴","la fourchette","f"],["🔪","le couteau","m"],["🥣","le bol","m"],
 
   // Musique et loisirs
-  ["🎵","la musique"],["🎸","la guitare"],["🎹","le piano"],["🥁","le tambour"],
-  ["🎺","la trompette"],["🎻","le violon"],["🎤","le microphone"],
-  ["⚽","le football"],["🏀","le basketball"],["🎾","le tennis"],["🏊","la natation"],
-  ["🎿","le ski"],["🚴","le cyclisme"],["🎮","le jeu vidéo"],["🎲","le dé"],
-  ["🧩","le puzzle"],["🎨","la peinture"],["🎭","le théâtre"],["🎬","le cinéma"],
+  ["🎵","la musique","f"],["🎸","la guitare","f"],["🎹","le piano","m"],["🥁","le tambour","m"],
+  ["🎺","la trompette","f"],["🎻","le violon","m"],["🎤","le microphone","m"],
+  ["⚽","le football","m"],["🏀","le basketball","m"],["🎾","le tennis","m"],["🏊","la natation","f"],
+  ["🎿","le ski","m"],["🚴","le cyclisme","m"],["🎮","le jeu vidéo","m"],["🎲","le dé","m"],
+  ["🧩","le puzzle","m"],["🎨","la peinture","f"],["🎭","le théâtre","m"],["🎬","le cinéma","m"],
 
   // Lieux
-  ["🏫","l'école"],["🏥","l'hôpital"],["🏪","le magasin"],["🏛️","le musée"],
-  ["⛪","l'église"],["🏰","le château"],["🗼","la tour"],["🏖️","la plage"],
-  ["🏔️","la montagne"],["🌋","le volcan"],["🏕️","le camping"],
+  ["🏫","l'école","f"],["🏥","l'hôpital","m"],["🏪","le magasin","m"],["🏛️","le musée","m"],
+  ["⛪","l'église","f"],["🏰","le château","m"],["🗼","la tour","f"],["🏖️","la plage","f"],
+  ["🏔️","la montagne","f"],["🌋","le volcan","m"],["🏕️","le camping","m"],
 
   // Émotions et expressions
   ["😀","content"],["😢","triste"],["😡","en colère"],["😱","effrayé"],
   ["😴","fatigué"],["🤔","pensif"],["😍","amoureux"],["🤢","malade"],
-  ["😂","mort de rire"],["🥳","la fête"],
+  ["😂","mort de rire"],["🥳","la fête","f"],
 
   // Divers
-  ["🕐","l'heure"],["📅","le calendrier"],["🎁","le cadeau"],["🎈","le ballon"],
-  ["🏳️","le drapeau"],["🗺️","la carte"],["💰","l'argent"],["📬","la boîte aux lettres"],
-  ["🧲","l'aimant"],["🔔","la cloche"],["🪴","la plante"],
+  ["🕐","l'heure","f"],["📅","le calendrier","m"],["🎁","le cadeau","m"],["🎈","le ballon","m"],
+  ["🏳️","le drapeau","m"],["🗺️","la carte","f"],["💰","l'argent","m"],["📬","la boîte aux lettres","f"],
+  ["🧲","l'aimant","m"],["🔔","la cloche","f"],["🪴","la plante","f"],
 ];
 
 const grid = document.getElementById('grid');
@@ -229,12 +232,13 @@ function render(filter = '') {
   const term = filter.toLowerCase();
   let count = 0;
 
-  for (const [emoji, label] of emojis) {
+  for (const [emoji, label, gender] of emojis) {
     if (term && !label.toLowerCase().includes(term)) continue;
     count++;
+    const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label">${label}</div>`;
+    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div>`;
     card.addEventListener('click', () => {
       document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
       card.classList.add('speaking');
