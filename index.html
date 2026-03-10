@@ -8,93 +8,165 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: #f0f2f5;
+    background: #f8f9fb;
     color: #1a1a2e;
     min-height: 100vh;
   }
   header {
-    background: linear-gradient(135deg, #002395, #fff, #ed2939);
-    padding: 2rem 1rem 1.5rem;
+    background: linear-gradient(135deg, #0a1628 0%, #162544 30%, #1e3a6e 50%, #7c2d3c 70%, #a8324a 100%);
+    padding: 2.5rem 1rem 1.8rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(0,35,149,0.3), transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(237,41,57,0.2), transparent 60%);
+    pointer-events: none;
   }
   header h1 {
-    font-size: 2.2rem;
-    color: #1a1a2e;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+    font-size: 2.4rem;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    position: relative;
   }
   header p {
-    margin-top: 0.3rem;
-    font-size: 1rem;
-    color: #333;
+    margin-top: 0.4rem;
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.7);
+    position: relative;
   }
   .controls {
-    max-width: 420px;
-    margin: 1.2rem auto 0;
+    max-width: 600px;
+    margin: 1.4rem auto 0;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.7rem;
+    position: relative;
   }
-  .controls input {
+  .controls > input[type="text"] {
     width: 100%;
-    padding: 0.7rem 1rem;
-    border: 2px solid #ccc;
-    border-radius: 8px;
+    padding: 0.75rem 1.1rem;
+    border: none;
+    border-radius: 12px;
     font-size: 1rem;
     outline: none;
-    transition: border-color 0.2s;
-    background: #fff;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s, box-shadow 0.2s;
   }
-  .controls input:focus {
-    border-color: #002395;
+  .controls > input[type="text"]::placeholder {
+    color: rgba(255,255,255,0.5);
   }
+  .controls > input[type="text"]:focus {
+    background: rgba(255,255,255,0.22);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+  }
+  /* Segmented controls shared */
+  .seg-group {
+    display: inline-flex;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+  }
+  .seg-group label {
+    cursor: pointer;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    background: transparent;
+    transition: all 0.2s;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .seg-group label:last-child {
+    border-right: none;
+  }
+  .seg-group label:hover {
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.08);
+  }
+  .seg-group input { display: none; }
+  .seg-group label:has(input:checked) {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
+  .seg-group label.masc-label:has(input:checked) {
+    background: rgba(100,160,255,0.3);
+    color: #b8d4ff;
+  }
+  .seg-group label.fem-label:has(input:checked) {
+    background: rgba(255,100,120,0.3);
+    color: #ffb8c0;
+  }
+  /* Voice group uses same .seg-group */
   .voice-radios {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+    display: inline-flex;
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
   }
   .voice-radios label {
     cursor: pointer;
-    padding: 0.4rem 1rem;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    font-size: 0.9rem;
+    padding: 0.35rem 0;
+    width: 4.2rem;
+    text-align: center;
+    font-size: 0.78rem;
     font-weight: 600;
-    color: #333;
-    background: #fff;
-    transition: border-color 0.2s, background 0.2s;
+    color: rgba(255,255,255,0.6);
+    background: transparent;
+    transition: all 0.2s;
+    border-right: 1px solid rgba(255,255,255,0.1);
+  }
+  .voice-radios label:last-child {
+    border-right: none;
+  }
+  .voice-radios label:hover {
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.08);
   }
   .voice-radios input { display: none; }
   .voice-radios input:checked + span {
-    color: #002395;
+    color: #fff;
   }
   .voice-radios label:has(input:checked) {
-    border-color: #002395;
-    background: rgba(0, 35, 149, 0.08);
+    background: rgba(255,255,255,0.2);
+    color: #fff;
   }
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 12px;
+    gap: 10px;
     max-width: 1200px;
     margin: 1.5rem auto;
     padding: 0 1rem 2rem;
   }
   .card {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 1rem 0.5rem;
     text-align: center;
     cursor: pointer;
     transition: transform 0.15s, box-shadow 0.15s;
     user-select: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
   }
   .card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
   }
   .card:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
   .card .emoji {
     font-size: 2.8rem;
@@ -102,22 +174,83 @@
   }
   .card .label {
     margin-top: 0.4rem;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
   }
-  .card .label.masc { color: #002395; }
-  .card .label.fem { color: #ed2939; }
-  .card .label.other { color: #555; }
+  .card .label.masc { color: #1a4fc9; }
+  .card .label.fem { color: #d42a42; }
+  .card .label.other { color: #666; }
+  .card .eng {
+    display: none;
+    font-size: 0.72rem;
+    color: #999;
+    margin-top: 0.15rem;
+  }
+  body.show-english .card .eng {
+    display: block;
+  }
   .card.speaking {
-    outline: 3px solid #002395;
+    outline: 3px solid #1a4fc9;
     outline-offset: -3px;
+    box-shadow: 0 4px 20px rgba(26,79,201,0.2);
   }
   .no-results {
     grid-column: 1 / -1;
     text-align: center;
     padding: 3rem 1rem;
-    color: #888;
+    color: #999;
     font-size: 1.1rem;
+  }
+  .toggle-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    user-select: none;
+  }
+  .toggle-label input { display: none; }
+  .toggle-slider {
+    position: relative;
+    width: 32px;
+    height: 18px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle-label input:checked + .toggle-slider {
+    background: rgba(255,255,255,0.35);
+  }
+  .toggle-label input:checked ~ span:last-child,
+  .toggle-label input:checked + .toggle-slider {
+    color: #fff;
+  }
+  .toggle-label:has(input:checked) {
+    color: #fff;
+  }
+  .toggle-label input:checked + .toggle-slider::after {
+    transform: translateX(14px);
+    background: #fff;
   }
   @media (max-width: 480px) {
     .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
@@ -134,153 +267,193 @@
   <p>Clique sur un émoji pour entendre sa prononciation en français</p>
   <div class="controls">
     <input type="text" id="search" placeholder="Rechercher..." autocomplete="off">
-    <div id="voice-options"></div>
+    <div class="toggle-bar">
+      <label class="toggle-label">
+        <input type="checkbox" id="eng-toggle">
+        <span class="toggle-slider"></span>
+        English
+      </label>
+      <div class="seg-group">
+        <label><input type="radio" name="gender" value="" checked><span>Tous</span></label>
+        <label class="masc-label"><input type="radio" name="gender" value="m"><span>Masc</span></label>
+        <label class="fem-label"><input type="radio" name="gender" value="f"><span>Fém</span></label>
+      </div>
+      <div id="voice-options"></div>
+    </div>
   </div>
 </header>
 
 <div class="grid" id="grid"></div>
 
 <script>
-// [emoji, label, gender] — "m" = masculin (bleu), "f" = féminin (rouge)
+// [emoji, french, gender, english]
 const emojis = [
   // Fruits
-  ["🍎","la pomme","f"],["🍐","la poire","f"],["🍊","l'orange","f"],["🍋","le citron","m"],
-  ["🍌","la banane","f"],["🍉","la pastèque","f"],["🍇","le raisin","m"],["🍓","la fraise","f"],
-  ["🫐","la myrtille","f"],["🍒","la cerise","f"],["🍑","la pêche","f"],["🥭","la mangue","f"],
-  ["🍍","l'ananas","m"],["🥥","la noix de coco","f"],["🥝","le kiwi","m"],["🍈","le melon","m"],
-  ["🫒","l'olive","f"],["🥜","la cacahuète","f"],["🌰","la châtaigne","f"],["🫘","le haricot","m"],
+  ["🍎","la pomme","f","apple"],["🍐","la poire","f","pear"],["🍊","l'orange","f","orange"],["🍋","le citron","m","lemon"],
+  ["🍌","la banane","f","banana"],["🍉","la pastèque","f","watermelon"],["🍇","le raisin","m","grape"],["🍓","la fraise","f","strawberry"],
+  ["🫐","la myrtille","f","blueberry"],["🍒","la cerise","f","cherry"],["🍑","la pêche","f","peach"],["🥭","la mangue","f","mango"],
+  ["🍍","l'ananas","m","pineapple"],["🥥","la noix de coco","f","coconut"],["🥝","le kiwi","m","kiwi"],["🍈","le melon","m","melon"],
+  ["🫒","l'olive","f","olive"],["🥜","la cacahuète","f","peanut"],["🌰","la châtaigne","f","chestnut"],["🫘","le haricot","m","bean"],
 
   // Légumes
-  ["🥕","la carotte","f"],["🌽","le maïs","m"],["🥦","le brocoli","m"],["🥒","le concombre","m"],
-  ["🍅","la tomate","f"],["🥬","la laitue","f"],["🧅","l'oignon","m"],["🧄","l'ail","m"],
-  ["🥔","la pomme de terre","f"],["🍆","l'aubergine","f"],["🌶️","le piment","m"],["🥑","l'avocat","m"],
-  ["🫑","le poivron","m"],["🍄","le champignon","m"],
-  ["🫚","le gingembre","m"],["🫛","le petit pois","m"],
+  ["🥕","la carotte","f","carrot"],["🌽","le maïs","m","corn"],["🥦","le brocoli","m","broccoli"],["🥒","le concombre","m","cucumber"],
+  ["🍅","la tomate","f","tomato"],["🥬","la laitue","f","lettuce"],["🧅","l'oignon","m","onion"],["🧄","l'ail","m","garlic"],
+  ["🥔","la pomme de terre","f","potato"],["🍆","l'aubergine","f","eggplant"],["🌶️","le piment","m","chili pepper"],["🥑","l'avocat","m","avocado"],
+  ["🫑","le poivron","m","bell pepper"],["🍄","le champignon","m","mushroom"],
+  ["🫚","le gingembre","m","ginger"],["🫛","le petit pois","m","pea"],
 
   // Nourriture
-  ["🍞","le pain","m"],["🥐","le croissant","m"],["🥖","la baguette","f"],["🧀","le fromage","m"],
-  ["🥚","l'œuf","m"],["🍳","l'œuf au plat","m"],["🥞","la crêpe","f"],["🧇","la gaufre","f"],
-  ["🥩","la viande","f"],["🍗","le poulet","m"],["🍖","la côtelette","f"],["🌭","le hot-dog","m"],
-  ["🍔","le hamburger","m"],["🍟","les frites","f"],["🍕","la pizza","f"],["🥗","la salade","f"],
-  ["🍝","les pâtes","f"],["🍜","la soupe","f"],["🍣","le sushi","m"],["🍩","le beignet","m"],
-  ["🍪","le biscuit","m"],["🎂","le gâteau","m"],["🍰","la part de gâteau","f"],["🍫","le chocolat","m"],
-  ["🍬","le bonbon","m"],["🍭","la sucette","f"],["🍦","la glace","f"],["☕","le café","m"],
-  ["🍵","le thé","m"],["🥛","le lait","m"],["🍷","le vin","m"],["🍺","la bière","f"],
-  ["🧃","le jus de fruit","m"],["🥤","la boisson","f"],["💧","l'eau","f"],
-  ["🥯","le bagel","m"],["🧈","le beurre","m"],["🥓","le bacon","m"],["🦐","la crevette","f"],
-  ["🦞","le homard","m"],["🥟","le ravioli","m"],["🧁","le cupcake","m"],["🥧","la tarte","f"],
-  ["🍮","le flan","m"],["🍿","le popcorn","m"],["🧂","le sel","m"],["🍶","le saké","m"],
-  ["🫖","la théière","f"],
+  ["🍞","le pain","m","bread"],["🥐","le croissant","m","croissant"],["🥖","la baguette","f","baguette"],["🧀","le fromage","m","cheese"],
+  ["🥚","l'œuf","m","egg"],["🍳","l'œuf au plat","m","fried egg"],["🥞","la crêpe","f","crêpe"],["🧇","la gaufre","f","waffle"],
+  ["🥩","la viande","f","meat"],["🍗","le poulet","m","chicken"],["🍖","la côtelette","f","chop"],["🌭","le hot-dog","m","hot dog"],
+  ["🍔","le hamburger","m","hamburger"],["🍟","les frites","f","fries"],["🍕","la pizza","f","pizza"],["🥗","la salade","f","salad"],
+  ["🍝","les pâtes","f","pasta"],["🍜","la soupe","f","soup"],["🍣","le sushi","m","sushi"],["🍩","le beignet","m","doughnut"],
+  ["🍪","le biscuit","m","cookie"],["🎂","le gâteau","m","cake"],["🍰","la part de gâteau","f","slice of cake"],["🍫","le chocolat","m","chocolate"],
+  ["🍬","le bonbon","m","candy"],["🍭","la sucette","f","lollipop"],["🍦","la glace","f","ice cream"],["☕","le café","m","coffee"],
+  ["🍵","le thé","m","tea"],["🥛","le lait","m","milk"],["🍷","le vin","m","wine"],["🍺","la bière","f","beer"],
+  ["🧃","le jus de fruit","m","fruit juice"],["🥤","la boisson","f","drink"],["💧","l'eau","f","water"],
+  ["🥯","le bagel","m","bagel"],["🧈","le beurre","m","butter"],["🥓","le bacon","m","bacon"],["🦐","la crevette","f","shrimp"],
+  ["🦞","le homard","m","lobster"],["🥟","le ravioli","m","dumpling"],["🧁","le cupcake","m","cupcake"],["🥧","la tarte","f","pie"],
+  ["🍮","le flan","m","flan"],["🍿","le popcorn","m","popcorn"],["🧂","le sel","m","salt"],["🍶","le saké","m","sake"],
+  ["🫖","la théière","f","teapot"],
 
   // Animaux
-  ["🐶","le chien","m"],["🐱","le chat","m"],["🐭","la souris","f"],["🐹","le hamster","m"],
-  ["🐰","le lapin","m"],["🦊","le renard","m"],["🐻","l'ours","m"],["🐼","le panda","m"],
-  ["🐨","le koala","m"],["🐯","le tigre","m"],["🦁","le lion","m"],["🐮","la vache","f"],
-  ["🐷","le cochon","m"],["🐸","la grenouille","f"],["🐵","le singe","m"],["🐔","la poule","f"],
-  ["🐧","le pingouin","m"],["🐦","l'oiseau","m"],["🦆","le canard","m"],["🦅","l'aigle","m"],
-  ["🦉","le hibou","m"],["🐴","le cheval","m"],["🦄","la licorne","f"],["🐝","l'abeille","f"],
-  ["🐛","la chenille","f"],["🦋","le papillon","m"],["🐌","l'escargot","m"],["🐞","la coccinelle","f"],
-  ["🐢","la tortue","f"],["🐍","le serpent","m"],["🦎","le lézard","m"],["🐙","la pieuvre","f"],
-  ["🦀","le crabe","m"],["🐟","le poisson","m"],["🐬","le dauphin","m"],["🐳","la baleine","f"],
-  ["🦈","le requin","m"],["🐊","le crocodile","m"],["🦒","la girafe","f"],["🐘","l'éléphant","m"],
-  ["🦏","le rhinocéros","m"],["🐪","le chameau","m"],["🐺","le loup","m"],["🦔","le hérisson","m"],
-  ["🦩","le flamant rose","m"],["🦜","le perroquet","m"],["🐓","le coq","m"],["🦃","la dinde","f"],
-  ["🐿️","l'écureuil","m"],["🦫","le castor","m"],["🦦","la loutre","f"],["🦥","le paresseux","m"],
-  ["🦘","le kangourou","m"],["🦛","l'hippopotame","m"],["🦬","le bison","m"],["🦌","le cerf","m"],
-  ["🦭","le phoque","m"],["🐫","le dromadaire","m"],["🕷️","l'araignée","f"],["🦂","le scorpion","m"],
-  ["🐠","le poisson tropical","m"],["🐡","le poisson-globe","m"],
+  ["🐶","le chien","m","dog"],["🐱","le chat","m","cat"],["🐭","la souris","f","mouse"],["🐹","le hamster","m","hamster"],
+  ["🐰","le lapin","m","rabbit"],["🦊","le renard","m","fox"],["🐻","l'ours","m","bear"],["🐼","le panda","m","panda"],
+  ["🐨","le koala","m","koala"],["🐯","le tigre","m","tiger"],["🦁","le lion","m","lion"],["🐮","la vache","f","cow"],
+  ["🐷","le cochon","m","pig"],["🐸","la grenouille","f","frog"],["🐵","le singe","m","monkey"],["🐔","la poule","f","hen"],
+  ["🐧","le pingouin","m","penguin"],["🐦","l'oiseau","m","bird"],["🦆","le canard","m","duck"],["🦅","l'aigle","m","eagle"],
+  ["🦉","le hibou","m","owl"],["🐴","le cheval","m","horse"],["🦄","la licorne","f","unicorn"],["🐝","l'abeille","f","bee"],
+  ["🐛","la chenille","f","caterpillar"],["🦋","le papillon","m","butterfly"],["🐌","l'escargot","m","snail"],["🐞","la coccinelle","f","ladybug"],
+  ["🐢","la tortue","f","turtle"],["🐍","le serpent","m","snake"],["🦎","le lézard","m","lizard"],["🐙","la pieuvre","f","octopus"],
+  ["🦀","le crabe","m","crab"],["🐟","le poisson","m","fish"],["🐬","le dauphin","m","dolphin"],["🐳","la baleine","f","whale"],
+  ["🦈","le requin","m","shark"],["🐊","le crocodile","m","crocodile"],["🦒","la girafe","f","giraffe"],["🐘","l'éléphant","m","elephant"],
+  ["🦏","le rhinocéros","m","rhinoceros"],["🐪","le chameau","m","camel"],["🐺","le loup","m","wolf"],["🦔","le hérisson","m","hedgehog"],
+  ["🦩","le flamant rose","m","flamingo"],["🦜","le perroquet","m","parrot"],["🐓","le coq","m","rooster"],["🦃","la dinde","f","turkey"],
+  ["🐿️","l'écureuil","m","squirrel"],["🦫","le castor","m","beaver"],["🦦","la loutre","f","otter"],["🦥","le paresseux","m","sloth"],
+  ["🦘","le kangourou","m","kangaroo"],["🦛","l'hippopotame","m","hippopotamus"],["🦬","le bison","m","bison"],["🦌","le cerf","m","deer"],
+  ["🦭","le phoque","m","seal"],["🐫","le dromadaire","m","dromedary"],["🕷️","l'araignée","f","spider"],["🦂","le scorpion","m","scorpion"],
+  ["🐠","le poisson tropical","m","tropical fish"],["🐡","le poisson-globe","m","pufferfish"],
 
   // Nature et météo
-  ["🌸","la fleur de cerisier","f"],["🌹","la rose","f"],["🌻","le tournesol","m"],["🌷","la tulipe","f"],
-  ["🌳","l'arbre","m"],["🌲","le sapin","m"],["🍀","le trèfle","m"],["🍁","la feuille d'érable","f"],
-  ["🍂","les feuilles mortes","f"],["🌍","la terre","f"],["🌙","la lune","f"],["⭐","l'étoile","f"],
-  ["☀️","le soleil","m"],["🌤️","le beau temps","m"],["⛅","les nuages","m"],["🌧️","la pluie","f"],
-  ["⛈️","l'orage","m"],["❄️","la neige","f"],["🌈","l'arc-en-ciel","m"],["💨","le vent","m"],
-  ["🌊","la vague","f"],["🔥","le feu","m"],["⚡","l'éclair","m"],
-  ["🌺","l'hibiscus","m"],["🌵","le cactus","m"],["🌾","le blé","m"],["🪨","le rocher","m"],
-  ["🌕","la pleine lune","f"],["🌪️","la tornade","f"],["🌫️","le brouillard","m"],
+  ["🌸","la fleur de cerisier","f","cherry blossom"],["🌹","la rose","f","rose"],["🌻","le tournesol","m","sunflower"],["🌷","la tulipe","f","tulip"],
+  ["🌳","l'arbre","m","tree"],["🌲","le sapin","m","fir tree"],["🍀","le trèfle","m","clover"],["🍁","la feuille d'érable","f","maple leaf"],
+  ["🍂","les feuilles mortes","f","fallen leaves"],["🌍","la terre","f","earth"],["🌙","la lune","f","moon"],["⭐","l'étoile","f","star"],
+  ["☀️","le soleil","m","sun"],["🌤️","le beau temps","m","fair weather"],["⛅","les nuages","m","clouds"],["🌧️","la pluie","f","rain"],
+  ["⛈️","l'orage","m","storm"],["❄️","la neige","f","snow"],["🌈","l'arc-en-ciel","m","rainbow"],["💨","le vent","m","wind"],
+  ["🌊","la vague","f","wave"],["🔥","le feu","m","fire"],["⚡","l'éclair","m","lightning"],
+  ["🌺","l'hibiscus","m","hibiscus"],["🌵","le cactus","m","cactus"],["🌾","le blé","m","wheat"],["🪨","le rocher","m","rock"],
+  ["🌕","la pleine lune","f","full moon"],["🌪️","la tornade","f","tornado"],["🌫️","le brouillard","m","fog"],
 
   // Transport
-  ["🚗","la voiture","f"],["🚕","le taxi","m"],["🚌","le bus","m"],["🚑","l'ambulance","f"],
-  ["🚒","le camion de pompiers","m"],["🚲","le vélo","m"],["🛵","le scooter","m"],["🚂","le train","m"],
-  ["✈️","l'avion","m"],["🚀","la fusée","f"],["🛳️","le bateau","m"],["🚁","l'hélicoptère","m"],
-  ["🛶","le canoë","m"],["⛵","le voilier","m"],
-  ["🚇","le métro","m"],["🚜","le tracteur","m"],["🏍️","la moto","f"],["🛴","la trottinette","f"],
-  ["🚐","le minibus","m"],["🚓","la voiture de police","f"],
+  ["🚗","la voiture","f","car"],["🚕","le taxi","m","taxi"],["🚌","le bus","m","bus"],["🚑","l'ambulance","f","ambulance"],
+  ["🚒","le camion de pompiers","m","fire truck"],["🚲","le vélo","m","bicycle"],["🛵","le scooter","m","scooter"],["🚂","le train","m","train"],
+  ["✈️","l'avion","m","airplane"],["🚀","la fusée","f","rocket"],["🛳️","le bateau","m","boat"],["🚁","l'hélicoptère","m","helicopter"],
+  ["🛶","le canoë","m","canoe"],["⛵","le voilier","m","sailboat"],
+  ["🚇","le métro","m","subway"],["🚜","le tracteur","m","tractor"],["🏍️","la moto","f","motorcycle"],["🛴","la trottinette","f","scooter"],
+  ["🚐","le minibus","m","minibus"],["🚓","la voiture de police","f","police car"],
 
   // Corps et personnes
-  ["👶","le bébé","m"],["👦","le garçon","m"],["👧","la fille","f"],["👨","l'homme","m"],
-  ["👩","la femme","f"],["👴","le grand-père","m"],["👵","la grand-mère","f"],
-  ["👀","les yeux","m"],["👁️","l'œil","m"],["👃","le nez","m"],["👂","l'oreille","f"],
-  ["👄","la bouche","f"],["🦷","la dent","f"],["👅","la langue","f"],["🧠","le cerveau","m"],
-  ["❤️","le cœur","m"],["💪","le bras","m"],["🦶","le pied","m"],["✋","la main","f"],
-  ["👆","le doigt","m"],
-  ["🫁","le poumon","m"],["🫀","le cœur anatomique","m"],["💅","l'ongle","m"],["🦴","l'os","m"],
-  ["🦵","le genou","m"],
+  ["👶","le bébé","m","baby"],["👦","le garçon","m","boy"],["👧","la fille","f","girl"],["👨","l'homme","m","man"],
+  ["👩","la femme","f","woman"],["👴","le grand-père","m","grandfather"],["👵","la grand-mère","f","grandmother"],
+  ["👀","les yeux","m","eyes"],["👁️","l'œil","m","eye"],["👃","le nez","m","nose"],["👂","l'oreille","f","ear"],
+  ["👄","la bouche","f","mouth"],["🦷","la dent","f","tooth"],["👅","la langue","f","tongue"],["🧠","le cerveau","m","brain"],
+  ["❤️","le cœur","m","heart"],["💪","le bras","m","arm"],["🦶","le pied","m","foot"],["✋","la main","f","hand"],
+  ["👆","le doigt","m","finger"],
+  ["🫁","le poumon","m","lung"],["🫀","le cœur anatomique","m","anatomical heart"],["💅","l'ongle","m","nail"],["🦴","l'os","m","bone"],
+  ["🦵","le genou","m","knee"],
 
   // Objets du quotidien
-  ["📱","le téléphone","m"],["💻","l'ordinateur","m"],["⌨️","le clavier","m"],["🖥️","l'écran","m"],
-  ["🖨️","l'imprimante","f"],["📷","l'appareil photo","m"],["📺","la télévision","f"],
-  ["🔑","la clé","f"],["🔒","le cadenas","m"],["💡","l'ampoule","f"],["🔦","la lampe torche","f"],
-  ["📚","les livres","m"],["📖","le livre","m"],["✏️","le crayon","m"],["🖊️","le stylo","m"],
-  ["✂️","les ciseaux","m"],["📎","le trombone","m"],["📏","la règle","f"],["🗑️","la poubelle","f"],
-  ["👓","les lunettes","f"],["🎒","le sac à dos","m"],["👟","la chaussure","f"],["👗","la robe","f"],
-  ["👔","la cravate","f"],["🧥","le manteau","m"],["🧤","les gants","m"],["🧣","l'écharpe","f"],
-  ["👒","le chapeau","m"],["☂️","le parapluie","m"],["💍","la bague","f"],["⌚","la montre","f"],
-  ["🪞","le miroir","m"],["🧴","le shampoing","m"],["💊","le médicament","m"],["🩹","le pansement","m"],
-  ["🔧","la clé à molette","f"],["🔨","le marteau","m"],["🪛","le tournevis","m"],["💉","la seringue","f"],
-  ["🩺","le stéthoscope","m"],
+  ["📱","le téléphone","m","phone"],["💻","l'ordinateur","m","computer"],["⌨️","le clavier","m","keyboard"],["🖥️","l'écran","m","screen"],
+  ["🖨️","l'imprimante","f","printer"],["📷","l'appareil photo","m","camera"],["📺","la télévision","f","television"],
+  ["🔑","la clé","f","key"],["🔒","le cadenas","m","padlock"],["💡","l'ampoule","f","light bulb"],["🔦","la lampe torche","f","flashlight"],
+  ["📚","les livres","m","books"],["📖","le livre","m","book"],["✏️","le crayon","m","pencil"],["🖊️","le stylo","m","pen"],
+  ["✂️","les ciseaux","m","scissors"],["📎","le trombone","m","paperclip"],["📏","la règle","f","ruler"],["🗑️","la poubelle","f","trash can"],
+  ["👓","les lunettes","f","glasses"],["🎒","le sac à dos","m","backpack"],["👟","la chaussure","f","shoe"],["👗","la robe","f","dress"],
+  ["👔","la cravate","f","tie"],["🧥","le manteau","m","coat"],["🧤","les gants","m","gloves"],["🧣","l'écharpe","f","scarf"],
+  ["👒","le chapeau","m","hat"],["☂️","le parapluie","m","umbrella"],["💍","la bague","f","ring"],["⌚","la montre","f","watch"],
+  ["🪞","le miroir","m","mirror"],["🧴","le shampoing","m","shampoo"],["💊","le médicament","m","medicine"],["🩹","le pansement","m","bandage"],
+  ["🔧","la clé à molette","f","wrench"],["🔨","le marteau","m","hammer"],["🪛","le tournevis","m","screwdriver"],["💉","la seringue","f","syringe"],
+  ["🩺","le stéthoscope","m","stethoscope"],
 
   // Maison
-  ["🏠","la maison","f"],["🚪","la porte","f"],["🪟","la fenêtre","f"],["🛏️","le lit","m"],
-  ["🛋️","le canapé","m"],["🪑","la chaise","f"],["🚿","la douche","f"],["🛁","la baignoire","f"],
-  ["🪥","la brosse à dents","f"],["🧼","le savon","m"],["🧹","le balai","m"],["🍽️","l'assiette","f"],
-  ["🥄","la cuillère","f"],["🍴","la fourchette","f"],["🔪","le couteau","m"],["🥣","le bol","m"],
-  ["🪜","l'échelle","f"],["🛗","l'ascenseur","m"],["🪣","le seau","m"],["🧽","l'éponge","f"],
-  ["🪠","la ventouse","f"],
+  ["🏠","la maison","f","house"],["🚪","la porte","f","door"],["🪟","la fenêtre","f","window"],["🛏️","le lit","m","bed"],
+  ["🛋️","le canapé","m","couch"],["🪑","la chaise","f","chair"],["🚿","la douche","f","shower"],["🛁","la baignoire","f","bathtub"],
+  ["🪥","la brosse à dents","f","toothbrush"],["🧼","le savon","m","soap"],["🧹","le balai","m","broom"],["🍽️","l'assiette","f","plate"],
+  ["🥄","la cuillère","f","spoon"],["🍴","la fourchette","f","fork"],["🔪","le couteau","m","knife"],["🥣","le bol","m","bowl"],
+  ["🪜","l'échelle","f","ladder"],["🛗","l'ascenseur","m","elevator"],["🪣","le seau","m","bucket"],["🧽","l'éponge","f","sponge"],
+  ["🪠","la ventouse","f","plunger"],
 
   // Musique et loisirs
-  ["🎵","la musique","f"],["🎸","la guitare","f"],["🎹","le piano","m"],["🥁","le tambour","m"],
-  ["🎺","la trompette","f"],["🎻","le violon","m"],["🎤","le microphone","m"],
-  ["⚽","le football","m"],["🏀","le basketball","m"],["🎾","le tennis","m"],["🏊","la natation","f"],
-  ["🎿","le ski","m"],["🚴","le cyclisme","m"],["🎮","le jeu vidéo","m"],["🎲","le dé","m"],
-  ["🧩","le puzzle","m"],["🎨","la peinture","f"],["🎭","le théâtre","m"],["🎬","le cinéma","m"],
-  ["🎯","la cible","f"],["🏄","le surf","m"],["🏈","le football américain","m"],["⛷️","le skieur","m"],
-  ["🎳","le bowling","m"],["🪁","le cerf-volant","m"],["🎪","le cirque","m"],
+  ["🎵","la musique","f","music"],["🎸","la guitare","f","guitar"],["🎹","le piano","m","piano"],["🥁","le tambour","m","drum"],
+  ["🎺","la trompette","f","trumpet"],["🎻","le violon","m","violin"],["🎤","le microphone","m","microphone"],
+  ["⚽","le football","m","soccer"],["🏀","le basketball","m","basketball"],["🎾","le tennis","m","tennis"],["🏊","la natation","f","swimming"],
+  ["🎿","le ski","m","skiing"],["🚴","le cyclisme","m","cycling"],["🎮","le jeu vidéo","m","video game"],["🎲","le dé","m","die"],
+  ["🧩","le puzzle","m","puzzle"],["🎨","la peinture","f","painting"],["🎭","le théâtre","m","theater"],["🎬","le cinéma","m","cinema"],
+  ["🎯","la cible","f","target"],["🏄","le surf","m","surfing"],["🏈","le football américain","m","American football"],["⛷️","le skieur","m","skier"],
+  ["🎳","le bowling","m","bowling"],["🪁","le cerf-volant","m","kite"],["🎪","le cirque","m","circus"],
 
   // Lieux
-  ["🏫","l'école","f"],["🏥","l'hôpital","m"],["🏪","le magasin","m"],["🏛️","le musée","m"],
-  ["⛪","l'église","f"],["🏰","le château","m"],["🗼","la tour","f"],["🏖️","la plage","f"],
-  ["🏔️","la montagne","f"],["🌋","le volcan","m"],["🏕️","le camping","m"],
-  ["🏟️","le stade","m"],["🏗️","le chantier","m"],["🏢","le bureau","m"],["🏘️","le quartier","m"],
-  ["🗽","la statue","f"],
+  ["🏫","l'école","f","school"],["🏥","l'hôpital","m","hospital"],["🏪","le magasin","m","store"],["🏛️","le musée","m","museum"],
+  ["⛪","l'église","f","church"],["🏰","le château","m","castle"],["🗼","la tour","f","tower"],["🏖️","la plage","f","beach"],
+  ["🏔️","la montagne","f","mountain"],["🌋","le volcan","m","volcano"],["🏕️","le camping","m","camping"],
+  ["🏟️","le stade","m","stadium"],["🏗️","le chantier","m","construction site"],["🏢","le bureau","m","office"],["🏘️","le quartier","m","neighborhood"],
+  ["🗽","la statue","f","statue"],
 
   // Émotions et expressions
-  ["😀","content"],["😢","triste"],["😡","en colère"],["😱","effrayé"],
-  ["😴","fatigué"],["🤔","pensif"],["😍","amoureux"],["🤢","malade"],
-  ["😂","mort de rire"],["🥳","la fête","f"],
-  ["😤","frustré"],["😳","gêné"],["🥱","ennuyé"],["😇","sage"],["🤗","câlin"],["😎","cool"],
+  ["😀","content","","happy"],["😃","joyeux","","joyful"],["😄","ravi","","delighted"],["😁","souriant","","grinning"],
+  ["😆","hilare","","hilarious"],["😅","soulagé","","relieved"],["🤣","plié de rire","","rolling on the floor laughing"],["😂","mort de rire","","crying laughing"],
+  ["🙂","légèrement souriant","","slightly smiling"],["🙃","à l'envers","","upside-down"],["😊","heureux","","happy"],
+  ["🥰","aimé","","loved"],["😍","amoureux","","in love"],["🤩","ébloui","","star-struck"],["😘","bisou","","blowing a kiss"],
+  ["😗","bouche en cœur","","kissing"],["😚","bisou les yeux fermés","","kissing with closed eyes"],["😙","bisou souriant","","kissing smiling"],
+  ["😋","gourmand","","yummy"],["😛","tire la langue","","tongue out"],["😜","clin d'œil moqueur","","winking tongue out"],
+  ["🤪","fou","","zany"],["😝","langue tirée yeux fermés","","squinting tongue out"],
+  ["🤗","câlin","","hugging"],["🤭","oups","","oops"],["🫢","bouche couverte","","hand over mouth"],
+  ["🫣","regarde à travers les doigts","","peeking"],["🤫","chut","","shushing"],["🤔","pensif","","thinking"],["🫡","salut","","saluting"],
+  ["🤐","bouche cousue","","zipper mouth"],["🤨","sceptique","","raised eyebrow"],["😐","neutre","","neutral"],
+  ["😑","blasé","","expressionless"],["😶","sans mot","","speechless"],["🫥","invisible","","dotted line face"],
+  ["😏","narquois","","smirking"],["😒","agacé","","unamused"],["🙄","exaspéré","","eye roll"],
+  ["😬","grinçant","","grimacing"],["😮‍💨","soupirant","","sighing"],["🤥","menteur","","lying"],
+  ["😌","serein","","serene"],["😔","pensif et triste","","pensive"],["😪","endormi","","sleepy"],
+  ["🤤","bavant","","drooling"],["😴","dort","","sleeping"],["🤮","vomissant","","vomiting"],
+  ["🤢","nauséeux","","nauseous"],["🤧","éternuant","","sneezing"],["🥵","chaud","","hot"],
+  ["🥶","gelé","","freezing"],["🥴","étourdi","","woozy"],["😵","assommé","","dizzy"],
+  ["😵‍💫","tête qui tourne","","dizzy with spirals"],["🤯","esprit soufflé","","mind blown"],
+  ["🤓","intello","","nerd"],["🧐","scrutateur","","monocle"],["😎","cool","","cool"],
+  ["🥸","déguisé","","disguised"],["🤠","cowboy","","cowboy"],
+  ["😕","confus","","confused"],["🫤","perplexe","","skeptical"],["😟","inquiet","","worried"],
+  ["🙁","légèrement triste","","slightly sad"],["☹️","mécontent","","frowning"],["😮","surpris bouche ouverte","","open mouth"],
+  ["😯","étonné","","hushed"],["😲","stupéfait","","astonished"],["🥹","ému","","holding back tears"],
+  ["😱","effrayé","","scared"],["😨","apeuré","","fearful"],["😰","anxieux","","anxious"],
+  ["😥","soulagé mais triste","","sad but relieved"],["😢","triste","","sad"],["😭","en pleurs","","sobbing"],
+  ["😤","frustré","","frustrated"],["😠","fâché","","angry"],["😡","furieux","","furious"],["🤬","jurant","","swearing"],
+  ["😈","diabolique","","impish"],["😳","gêné","","flushed"],["🥱","ennuyé","","yawning"],
+  ["🥳","fêtard","","party"],["🫠","fondant","","melting"],["😶‍🌫️","dans le brouillard","","in fog"],
+  ["😇","sage","","angelic"],["😉","clin d'œil","","winking"],
 
   // Divers
-  ["🕐","l'heure","f"],["📅","le calendrier","m"],["🎁","le cadeau","m"],["🎈","le ballon","m"],
-  ["🏳️","le drapeau","m"],["🗺️","la carte","f"],["💰","l'argent","m"],["📬","la boîte aux lettres","f"],
-  ["🧲","l'aimant","m"],["🔔","la cloche","f"],["🪴","la plante","f"],
-  ["🧭","la boussole","f"],["🏆","le trophée","m"],["🎀","le ruban","m"],["🧸","l'ours en peluche","m"],
-  ["📌","la punaise","f"],["🔋","la batterie","f"],["💎","le diamant","m"],
+  ["🕐","l'heure","f","time"],["📅","le calendrier","m","calendar"],["🎁","le cadeau","m","gift"],["🎈","le ballon","m","balloon"],
+  ["🏳️","le drapeau","m","flag"],["🗺️","la carte","f","map"],["💰","l'argent","m","money"],["📬","la boîte aux lettres","f","mailbox"],
+  ["🧲","l'aimant","m","magnet"],["🔔","la cloche","f","bell"],["🪴","la plante","f","plant"],
+  ["🧭","la boussole","f","compass"],["🏆","le trophée","m","trophy"],["🎀","le ruban","m","ribbon"],["🧸","l'ours en peluche","m","teddy bear"],
+  ["📌","la punaise","f","thumbtack"],["🔋","la batterie","f","battery"],["💎","le diamant","m","diamond"],
 
   // Créatures et visages
-  ["👹","le démon","m"],["👺","le gobelin","m"],["👻","le fantôme","m"],["👽","l'extraterrestre","m"],
-  ["🤖","le robot","m"],["👾","le monstre","m"],["🎃","la citrouille","f"],["💀","le crâne","m"],
-  ["☠️","la tête de mort","f"],["🤡","le clown","m"],["👿","le diable","m"],["💩","le caca","m"],
-  ["🧛","le vampire","m"],["🧟","le zombie","m"],["🧙","le sorcier","m"],["🧚","la fée","f"],
-  ["🧜","la sirène","f"],["🧞","le génie","m"],["🧝","l'elfe","m"],["👼","l'ange","m"],
-  ["🎅","le père Noël","m"],
+  ["👹","le démon","m","demon"],["👺","le gobelin","m","goblin"],["👻","le fantôme","m","ghost"],["👽","l'extraterrestre","m","alien"],
+  ["🤖","le robot","m","robot"],["👾","le monstre","m","monster"],["🎃","la citrouille","f","pumpkin"],["💀","le crâne","m","skull"],
+  ["☠️","la tête de mort","f","skull and crossbones"],["🤡","le clown","m","clown"],["👿","le diable","m","devil"],["💩","le caca","m","poop"],
+  ["🧛","le vampire","m","vampire"],["🧟","le zombie","m","zombie"],["🧙","le sorcier","m","wizard"],["🧚","la fée","f","fairy"],
+  ["🧜","la sirène","f","mermaid"],["🧞","le génie","m","genie"],["🧝","l'elfe","m","elf"],["👼","l'ange","m","angel"],
+  ["🎅","le père Noël","m","Santa Claus"],
 ];
 
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
 const voiceOptions = document.getElementById('voice-options');
+const engToggle = document.getElementById('eng-toggle');
+const genderRadios = document.querySelectorAll('input[name="gender"]');
 let selectedVoice = null;
+let genderFilter = '';
 
 function loadVoices() {
   const voices = speechSynthesis.getVoices();
@@ -322,13 +495,14 @@ function render(filter = '') {
   const term = normalize(filter);
   let count = 0;
 
-  for (const [emoji, label, gender] of emojis) {
+  for (const [emoji, label, gender, english] of emojis) {
     if (term && !normalize(label).includes(term)) continue;
+    if (genderFilter && gender !== genderFilter) continue;
     count++;
     const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
     const card = document.createElement('div');
     card.className = 'card';
-    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div>`;
+    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
     card.addEventListener('click', () => {
       document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
       card.classList.add('speaking');
@@ -343,6 +517,17 @@ function render(filter = '') {
     grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
   }
 }
+
+engToggle.addEventListener('change', (e) => {
+  document.body.classList.toggle('show-english', e.target.checked);
+});
+
+genderRadios.forEach(radio => {
+  radio.addEventListener('change', () => {
+    genderFilter = radio.value;
+    render(searchInput.value);
+  });
+});
 
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
