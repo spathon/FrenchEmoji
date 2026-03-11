@@ -1,0 +1,15 @@
+{
+  "name": "French Emoji — Apprends le français avec des émojis",
+  "short_name": "Fr-Moji",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
