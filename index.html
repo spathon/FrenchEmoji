@@ -808,7 +808,15 @@ randomDialog.addEventListener('click', (e) => {
   if (e.target === randomDialog) randomDialog.close();
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+}
 </script>
 
 </body>
