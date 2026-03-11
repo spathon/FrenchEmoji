@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fr-moji-v2';
+const CACHE_NAME = 'fr-moji-v3';
 const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', (e) => {
