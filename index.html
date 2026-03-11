@@ -52,8 +52,13 @@
     gap: 0.7rem;
     position: relative;
   }
-  .controls > input[type="text"] {
-    width: 100%;
+  .search-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  .search-row input[type="text"] {
+    flex: 1;
     padding: 0.75rem 1.1rem;
     border: none;
     border-radius: 12px;
@@ -64,12 +69,129 @@
     backdrop-filter: blur(8px);
     transition: background 0.2s, box-shadow 0.2s;
   }
-  .controls > input[type="text"]::placeholder {
+  .search-row input[type="text"]::placeholder {
     color: rgba(255,255,255,0.5);
   }
-  .controls > input[type="text"]:focus {
+  .search-row input[type="text"]:focus {
     background: rgba(255,255,255,0.22);
     box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+  }
+  .random-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 0 0.85rem;
+    font-size: 1.3rem;
+    cursor: pointer;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    backdrop-filter: blur(8px);
+    transition: background 0.2s, transform 0.15s;
+    line-height: 1;
+  }
+  .random-btn:hover {
+    background: rgba(255,255,255,0.25);
+  }
+  .random-btn:active {
+    transform: scale(0.93);
+  }
+  /* Random dialog */
+  #random-dialog {
+    border: none;
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    text-align: center;
+    max-width: 320px;
+    width: 90vw;
+    margin: auto;
+    animation: dialog-in 0.25s ease;
+  }
+  #random-dialog::backdrop {
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+  }
+  @keyframes dialog-in {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  #random-dialog .rd-emoji {
+    font-size: 5rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: transform 0.15s;
+    display: inline-block;
+  }
+  #random-dialog .rd-emoji:hover {
+    transform: scale(1.1);
+  }
+  #random-dialog .rd-emoji:active {
+    transform: scale(0.95);
+  }
+  #random-dialog .rd-french {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 0.6rem;
+    color: #1a1a2e;
+  }
+  #random-dialog .rd-english {
+    font-size: 0.9rem;
+    color: #999;
+    margin-top: 0.2rem;
+    display: none;
+  }
+  body.show-english #random-dialog .rd-english {
+    display: block;
+  }
+  #random-dialog .rd-gender {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+    visibility: visible;
+  }
+  #random-dialog .rd-gender.masc {
+    background: rgba(26,79,201,0.1);
+    color: #1a4fc9;
+  }
+  #random-dialog .rd-gender.fem {
+    background: rgba(212,42,66,0.1);
+    color: #d42a42;
+  }
+  #random-dialog .rd-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+    justify-content: center;
+  }
+  #random-dialog .rd-actions button {
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+  }
+  #random-dialog .rd-actions button:active {
+    transform: scale(0.95);
+  }
+  #random-dialog .rd-another {
+    background: linear-gradient(135deg, #1a4fc9, #a8324a);
+    color: #fff;
+  }
+  #random-dialog .rd-another:hover {
+    opacity: 0.9;
+  }
+  #random-dialog .rd-close {
+    background: #f0f0f0;
+    color: #666;
+  }
+  #random-dialog .rd-close:hover {
+    background: #e4e4e4;
   }
   /* Segmented controls shared */
   .seg-group {
@@ -270,7 +392,10 @@
   <h1>French Emoji</h1>
   <p>Clique sur un émoji pour entendre sa prononciation en français</p>
   <div class="controls">
-    <input type="text" id="search" placeholder="Rechercher..." autocomplete="off">
+    <div class="search-row">
+      <input type="text" id="search" placeholder="Rechercher..." autocomplete="off">
+      <button class="random-btn" id="random-btn" title="Émoji aléatoire" aria-label="Random emoji">🎲</button>
+    </div>
     <div class="toggle-bar">
       <label class="toggle-label">
         <input type="checkbox" id="eng-toggle">
@@ -286,6 +411,17 @@
     </div>
   </div>
 </header>
+
+<dialog id="random-dialog">
+  <div class="rd-emoji" id="rd-emoji"></div>
+  <div class="rd-french" id="rd-french"></div>
+  <div class="rd-english" id="rd-english"></div>
+  <div class="rd-gender" id="rd-gender"></div>
+  <div class="rd-actions">
+    <button class="rd-another" id="rd-another">🎲 Encore !</button>
+    <button class="rd-close" id="rd-close">Fermer</button>
+  </div>
+</dialog>
 
 <div class="grid" id="grid"></div>
 
@@ -634,6 +770,44 @@ loadVoices();
 
 searchInput.addEventListener('input', e => render(e.target.value));
 render();
+
+// Random emoji dialog
+const randomDialog = document.getElementById('random-dialog');
+const rdEmoji = document.getElementById('rd-emoji');
+const rdFrench = document.getElementById('rd-french');
+const rdEnglish = document.getElementById('rd-english');
+const rdGender = document.getElementById('rd-gender');
+
+function openRandomDialog() {
+  const entry = emojis[Math.floor(Math.random() * emojis.length)];
+  const [emoji, label, gender, english] = entry;
+  rdEmoji.textContent = emoji;
+  rdFrench.textContent = label;
+  rdEnglish.textContent = english;
+  if (gender === 'm') {
+    rdGender.textContent = 'masculin';
+    rdGender.className = 'rd-gender masc';
+    rdGender.style.visibility = '';
+  } else if (gender === 'f') {
+    rdGender.textContent = 'féminin';
+    rdGender.className = 'rd-gender fem';
+    rdGender.style.visibility = '';
+  } else {
+    rdGender.textContent = '\u00A0';
+    rdGender.style.visibility = 'hidden';
+  }
+  rdEmoji.onclick = () => { speechSynthesis.speak(speak(label)); };
+  if (!randomDialog.open) randomDialog.showModal();
+  speechSynthesis.speak(speak(label));
+}
+
+document.getElementById('random-btn').addEventListener('click', openRandomDialog);
+document.getElementById('rd-another').addEventListener('click', openRandomDialog);
+document.getElementById('rd-close').addEventListener('click', () => randomDialog.close());
+randomDialog.addEventListener('click', (e) => {
+  if (e.target === randomDialog) randomDialog.close();
+});
+
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 </script>
 
