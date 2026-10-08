@@ -373,3 +373,74 @@ body.show-english .card .eng {
   .card .label { font-size: 0.75rem; }
   header h1 { font-size: 1.6rem; }
 }
+/* Progress: favourites / known */
+.toggle-bar { flex-wrap: wrap; }
+.seg-group label.fav-label:has(input:checked) {
+  background: rgba(255,200,60,0.3);
+  color: #ffe9a8;
+}
+.progress-line {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  font-variant-numeric: tabular-nums;
+}
+.card { position: relative; }
+.mark-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  border-radius: 8px;
+  transition: opacity 0.15s, background 0.15s, transform 0.15s, filter 0.15s;
+}
+.mark-btn:focus-visible { outline: 2px solid #1a4fc9; outline-offset: 1px; }
+.mark-btn:active { transform: scale(0.88); }
+.card .mark-btn {
+  position: absolute;
+  top: 4px;
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+  opacity: 0.35;
+}
+.card .fav-btn { left: 4px; }
+.card .known-btn { right: 4px; font-weight: 800; color: #888; }
+.mark-btn.fav-btn[aria-pressed="false"] { filter: grayscale(1); }
+.card .mark-btn:hover { background: rgba(0,0,0,0.05); opacity: 1; }
+.card .mark-btn[aria-pressed="true"] { opacity: 1; }
+.mark-btn.known-btn[aria-pressed="true"] { color: #fff; background: #1f9d55; }
+.card .known-btn[aria-pressed="true"] {
+  width: 20px;
+  height: 20px;
+  top: 7px;
+  right: 7px;
+  font-size: 0.7rem;
+  border-radius: 50%;
+}
+@media (hover: hover) {
+  .card .mark-btn { opacity: 0; }
+  .card:hover .mark-btn, .card:focus-within .mark-btn { opacity: 0.5; }
+  .card .mark-btn[aria-pressed="true"], .card .mark-btn:hover, .card .mark-btn:focus-visible { opacity: 1; }
+}
+.card.known { background: #f7faf8; }
+.card.known .emoji, .card.known .label, .card.known .eng { opacity: 0.55; }
+/* Random dialog toggles */
+#random-dialog .rd-marks {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+#random-dialog .mark-btn {
+  width: 40px;
+  height: 34px;
+  font-size: 1rem;
+  background: #f0f0f0;
+  color: #888;
+  font-weight: 800;
+}
+#random-dialog .mark-btn:hover { background: #e4e4e4; }
+#random-dialog .fav-btn[aria-pressed="true"] { background: rgba(255,200,60,0.25); }
+#random-dialog .known-btn[aria-pressed="true"] { background: #1f9d55; color: #fff; }

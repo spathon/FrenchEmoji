@@ -31,8 +31,14 @@
         <label class="masc-label"><input type="radio" name="gender" value="m"><span>Masc</span></label>
         <label class="fem-label"><input type="radio" name="gender" value="f"><span>Fém</span></label>
       </div>
+      <div class="seg-group" id="progress-filter">
+        <label><input type="radio" name="progress" value="" checked><span>Tous</span></label>
+        <label class="fav-label"><input type="radio" name="progress" value="fav"><span>⭐ Favoris</span></label>
+        <label><input type="radio" name="progress" value="todo"><span>À apprendre</span></label>
+      </div>
       <div id="voice-options"></div>
     </div>
+    <div class="progress-line" id="progress-line" aria-live="polite"></div>
   </div>
 </header>
 
@@ -41,6 +47,10 @@
   <div class="rd-french" id="rd-french"></div>
   <div class="rd-english" id="rd-english"></div>
   <div class="rd-gender" id="rd-gender"></div>
+  <div class="rd-marks">
+    <button type="button" class="mark-btn fav-btn" id="rd-fav" aria-pressed="false" aria-label="Favori">⭐</button>
+    <button type="button" class="mark-btn known-btn" id="rd-known" aria-pressed="false" aria-label="Je connais">✓</button>
+  </div>
   <div class="rd-actions">
     <button class="rd-close" id="rd-close">Fermer</button>
     <button class="rd-another" id="rd-another">🎲 Encore !</button>
@@ -314,6 +324,68 @@ const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
 let selectedVoice = null;
 let genderFilter = '';
+let progressFilter = '';
+
+// Progress (favourites / known words), stored per browser
+const PROGRESS_KEY = 'fr-moji-progress';
+const favs = new Set();
+const known = new Set();
+try {
+  const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
+  (saved.favs || []).forEach(e => favs.add(e));
+  (saved.known || []).forEach(e => known.add(e));
+} catch (e) {}
+
+function saveProgress() {
+  try {
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ favs: [...favs], known: [...known] }));
+  } catch (e) {}
+}
+
+const progressLine = document.getElementById('progress-line');
+const allEmojis = new Set(emojis.map(e => e[0]));
+function updateProgress() {
+  let n = 0;
+  known.forEach(e => { if (allEmojis.has(e)) n++; });
+  progressLine.textContent = `${n} / ${allEmojis.size} appris`;
+}
+
+function setMarkBtn(btn, type, on) {
+  // Stable aria-label + aria-pressed for screen readers; the tooltip describes the action
+  btn.setAttribute('aria-pressed', on);
+  btn.setAttribute('aria-label', type === 'fav' ? 'Favori' : 'Je connais');
+  btn.title = type === 'fav'
+    ? (on ? 'Retirer des favoris' : 'Ajouter aux favoris')
+    : (on ? 'Marquer « à apprendre »' : 'Je connais ce mot');
+}
+
+function toggleMark(emoji, type) {
+  const set = type === 'fav' ? favs : known;
+  if (set.has(emoji)) set.delete(emoji); else set.add(emoji);
+  saveProgress();
+  updateProgress();
+  syncMarks(emoji);
+}
+
+// Refresh every visible control (cards + random dialog) for one emoji
+function syncMarks(emoji) {
+  document.querySelectorAll('[data-emoji]').forEach(el => {
+    if (el.dataset.emoji !== emoji) return;
+    if (el.classList.contains('card')) el.classList.toggle('known', known.has(emoji));
+    el.querySelectorAll('.mark-btn').forEach(b => setMarkBtn(b, b.dataset.type, (b.dataset.type === 'fav' ? favs : known).has(emoji)));
+  });
+}
+
+function makeMarkBtn(emoji, type) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = `mark-btn ${type === 'fav' ? 'fav-btn' : 'known-btn'}`;
+  btn.dataset.type = type;
+  btn.textContent = type === 'fav' ? '⭐' : '✓';
+  setMarkBtn(btn, type, (type === 'fav' ? favs : known).has(emoji));
+  btn.addEventListener('click', (e) => { e.stopPropagation(); toggleMark(emoji, type); });
+  return btn;
+}
 
 function loadVoices() {
   const voices = speechSynthesis.getVoices();
@@ -358,11 +430,15 @@ function render(filter = '') {
   for (const [emoji, label, gender, english] of emojis) {
     if (term && !normalize(label).includes(term)) continue;
     if (genderFilter && gender !== genderFilter) continue;
+    if (progressFilter === 'fav' && !favs.has(emoji)) continue;
+    if (progressFilter === 'todo' && known.has(emoji)) continue;
     count++;
     const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = known.has(emoji) ? 'card known' : 'card';
+    card.dataset.emoji = emoji;
     card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
+    card.append(makeMarkBtn(emoji, 'fav'), makeMarkBtn(emoji, 'known'));
     card.addEventListener('click', () => {
       document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
       card.classList.add('speaking');
@@ -374,7 +450,9 @@ function render(filter = '') {
   }
 
   if (count === 0) {
-    grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
+    grid.innerHTML = progressFilter === 'fav' && !term && !genderFilter && favs.size === 0
+      ? '<div class="no-results">Aucun favori pour l’instant — touche ⭐ sur une carte</div>'
+      : '<div class="no-results">Aucun résultat trouvé</div>';
   }
 }
 
@@ -389,6 +467,15 @@ genderRadios.forEach(radio => {
   });
 });
 
+document.querySelectorAll('input[name="progress"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    progressFilter = radio.value;
+    render(searchInput.value);
+  });
+});
+
+updateProgress();
+
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
@@ -401,9 +488,19 @@ const rdEmoji = document.getElementById('rd-emoji');
 const rdFrench = document.getElementById('rd-french');
 const rdEnglish = document.getElementById('rd-english');
 const rdGender = document.getElementById('rd-gender');
+const rdMarks = randomDialog.querySelector('.rd-marks');
+const rdFav = document.getElementById('rd-fav');
+const rdKnown = document.getElementById('rd-known');
+rdFav.dataset.type = 'fav';
+rdKnown.dataset.type = 'known';
+rdFav.addEventListener('click', () => toggleMark(rdMarks.dataset.emoji, 'fav'));
+rdKnown.addEventListener('click', () => toggleMark(rdMarks.dataset.emoji, 'known'));
 
 function openRandomDialog() {
-  const entry = emojis[Math.floor(Math.random() * emojis.length)];
+  // Favour words not yet marked as known
+  const todo = emojis.filter(e => !known.has(e[0]));
+  const pool = todo.length ? todo : emojis;
+  const entry = pool[Math.floor(Math.random() * pool.length)];
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
   rdFrench.textContent = label;
@@ -420,6 +517,9 @@ function openRandomDialog() {
     rdGender.textContent = '\u00A0';
     rdGender.style.visibility = 'hidden';
   }
+  rdMarks.dataset.emoji = emoji;
+  setMarkBtn(rdFav, 'fav', favs.has(emoji));
+  setMarkBtn(rdKnown, 'known', known.has(emoji));
   rdEmoji.onclick = () => { speechSynthesis.speak(speak(label)); };
   if (!randomDialog.open) randomDialog.showModal();
   speechSynthesis.speak(speak(label));
