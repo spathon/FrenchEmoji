@@ -43,7 +43,7 @@
 </header>
 
 <dialog id="random-dialog">
-  <div class="rd-emoji" id="rd-emoji"></div>
+  <button type="button" class="rd-emoji" id="rd-emoji"></button>
   <div class="rd-french" id="rd-french"></div>
   <div class="rd-english" id="rd-english"></div>
   <div class="rd-gender" id="rd-gender"></div>
@@ -406,9 +406,11 @@ function render(filter = '') {
     if (genderFilter && gender !== genderFilter) continue;
     count++;
     const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
-    const card = document.createElement('div');
+    const card = document.createElement('button');
+    card.type = 'button';
     card.className = 'card';
-    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
+    card.setAttribute('aria-label', `${label} — écouter`);
+    card.innerHTML = `<span class="emoji" aria-hidden="true">${emoji}</span><span class="label ${cls}">${label}</span><span class="eng">${english}</span>`;
     card.addEventListener('click', () => {
       document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
       card.classList.add('speaking');
@@ -458,6 +460,7 @@ function openRandomDialog() {
   const entry = emojis[Math.floor(Math.random() * emojis.length)];
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
+  rdEmoji.setAttribute('aria-label', `${label} — réécouter`);
   rdFrench.textContent = label;
   rdEnglish.textContent = english;
   if (gender === 'm') {

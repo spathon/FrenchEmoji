@@ -106,6 +106,12 @@ header p {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 #random-dialog .rd-emoji {
+  border: none;
+  background: none;
+  padding: 0 0.2em;
+  border-radius: 16px;
+  font: inherit;
+  color: inherit;
   font-size: 5rem;
   line-height: 1.2;
   cursor: pointer;
@@ -117,6 +123,11 @@ header p {
 }
 #random-dialog .rd-emoji:active {
   transform: scale(0.95);
+}
+#random-dialog .rd-emoji:focus-visible,
+#random-dialog .rd-actions button:focus-visible {
+  outline: 3px solid #1a4fc9;
+  outline-offset: 2px;
 }
 #random-dialog .rd-french {
   font-size: 1.3rem;
@@ -262,6 +273,13 @@ body.show-english #random-dialog .rd-english {
   padding: 0 1rem 2rem;
 }
 .card {
+  display: block;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
   background: #fff;
   border-radius: 14px;
   padding: 1rem 0.5rem;
@@ -278,6 +296,15 @@ body.show-english #random-dialog .rd-english {
 }
 .card:active {
   transform: scale(0.97);
+}
+.card:focus-visible {
+  outline: 3px solid #1a4fc9;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(26,79,201,0.15);
+}
+.card .emoji,
+.card .label {
+  display: block;
 }
 .card .emoji {
   font-size: 2.8rem;
