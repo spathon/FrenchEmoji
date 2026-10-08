@@ -31,8 +31,14 @@
         <label class="masc-label"><input type="radio" name="gender" value="m"><span>Masc</span></label>
         <label class="fem-label"><input type="radio" name="gender" value="f"><span>Fém</span></label>
       </div>
-      <div id="voice-options"></div>
+      <label class="toggle-label">
+        <input type="checkbox" id="slow-toggle">
+        <span class="toggle-slider"></span>
+        🐢 Lent
+      </label>
+      <select id="voice-select" class="voice-select" aria-label="Voix" hidden></select>
     </div>
+    <p class="voice-notice" id="voice-notice" role="status" hidden></p>
   </div>
 </header>
 
@@ -309,41 +315,77 @@ const emojis = [
 
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
-const voiceOptions = document.getElementById('voice-options');
+const voiceSelect = document.getElementById('voice-select');
+const slowToggle = document.getElementById('slow-toggle');
+const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
 let selectedVoice = null;
 let genderFilter = '';
 
+const hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+let frVoices = [];
+let slow = store.get('fr-moji-slow') === '1';
+slowToggle.checked = slow;
+
+const voiceLang = v => v.lang.replace('_', '-').toLowerCase();
+const isFrFR = v => voiceLang(v) === 'fr-fr';
+
 function loadVoices() {
+  if (!hasSpeech) return;
   const voices = speechSynthesis.getVoices();
-  const frVoices = voices.filter(v => v.lang.startsWith('fr'));
-  const thomas = frVoices.find(v => v.name.includes('Thomas'));
-  const amelie = frVoices.find(v => v.name.includes('Amelie') || v.name.includes('Amélie'));
-
-  voiceOptions.innerHTML = '';
-
-  if (thomas && amelie) {
-    voiceOptions.className = 'voice-radios';
-    [[amelie, 'Amelie'], [thomas, 'Thomas']].forEach(([voice, name], i) => {
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="radio" name="voice" value="${i}" ${i === 0 ? 'checked' : ''}><span>${name}</span>`;
-      label.querySelector('input').addEventListener('change', () => { selectedVoice = voice; });
-      voiceOptions.appendChild(label);
-    });
-    selectedVoice = amelie;
-  } else {
-    selectedVoice = frVoices[0] || null;
+  frVoices = voices.filter(v => voiceLang(v).startsWith('fr'));
+  frVoices = [...frVoices.filter(isFrFR), ...frVoices.filter(v => !isFrFR(v))];
+  if (!frVoices.length) {
+    selectedVoice = null;
+    voiceSelect.hidden = true;
+    return;
   }
+  voiceNotice.hidden = true;
+  const saved = store.get('fr-moji-voice');
+  selectedVoice = frVoices.find(v => v.name === saved)
+    || frVoices.find(v => /am[eé]lie/i.test(v.name))
+    || frVoices.find(isFrFR) || frVoices[0];
+  voiceSelect.innerHTML = '';
+  frVoices.forEach((v, i) => {
+    const name = isFrFR(v) ? v.name : `${v.name} (${v.lang.replace('_', '-')})`;
+    voiceSelect.add(new Option(name, i, false, v === selectedVoice));
+  });
+  voiceSelect.hidden = frVoices.length < 2;
 }
 
-function speak(text) {
+function showVoiceNotice(msg) {
+  voiceNotice.textContent = msg;
+  voiceNotice.hidden = false;
+}
+
+function checkFrenchVoice() {
+  if (!frVoices.length) showVoiceNotice('Aucune voix française trouvée sur cet appareil. Pour entendre la prononciation, installe une voix française dans les réglages du système (Langue ou Synthèse vocale), puis recharge la page.');
+}
+
+voiceSelect.addEventListener('change', () => {
+  selectedVoice = frVoices[voiceSelect.value] || null;
+  if (selectedVoice) store.set('fr-moji-voice', selectedVoice.name);
+});
+
+slowToggle.addEventListener('change', () => {
+  slow = slowToggle.checked;
+  store.set('fr-moji-slow', slow ? '1' : '0');
+});
+
+function say(text, onend) {
+  if (!hasSpeech) { if (onend) onend(); return; }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'fr-FR';
-  utter.rate = 0.9;
+  utter.lang = selectedVoice ? selectedVoice.lang : 'fr-FR';
+  utter.rate = slow ? 0.6 : 0.9;
   if (selectedVoice) utter.voice = selectedVoice;
-  return utter;
+  if (onend) utter.onend = onend;
+  speechSynthesis.speak(utter);
 }
 
 function normalize(str) {
@@ -370,9 +412,7 @@ function render(filter = '') {
     card.addEventListener('click', () => {
       document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
       card.classList.add('speaking');
-      const utter = speak(label);
-      utter.onend = () => card.classList.remove('speaking');
-      speechSynthesis.speak(utter);
+      say(label, () => card.classList.remove('speaking'));
     });
     grid.appendChild(card);
   }
@@ -393,8 +433,16 @@ genderRadios.forEach(radio => {
   });
 });
 
-speechSynthesis.onvoiceschanged = loadVoices;
-loadVoices();
+if (hasSpeech) {
+  speechSynthesis.addEventListener('voiceschanged', () => {
+    loadVoices();
+    if (speechSynthesis.getVoices().length) checkFrenchVoice();
+  });
+  loadVoices();
+  setTimeout(() => { loadVoices(); checkFrenchVoice(); }, 1500);
+} else {
+  showVoiceNotice('Ton navigateur ne prend pas en charge la synthèse vocale : la prononciation ne sera pas disponible.');
+}
 
 searchInput.addEventListener('input', e => render(e.target.value));
 render();
@@ -424,9 +472,9 @@ function openRandomDialog() {
     rdGender.textContent = '\u00A0';
     rdGender.style.visibility = 'hidden';
   }
-  rdEmoji.onclick = () => { speechSynthesis.speak(speak(label)); };
+  rdEmoji.onclick = () => say(label);
   if (!randomDialog.open) randomDialog.showModal();
-  speechSynthesis.speak(speak(label));
+  say(label);
 }
 
 document.getElementById('random-btn').addEventListener('click', openRandomDialog);
