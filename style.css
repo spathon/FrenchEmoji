@@ -373,3 +373,57 @@ body.show-english .card .eng {
   .card .label { font-size: 0.75rem; }
   header h1 { font-size: 1.6rem; }
 }
+/* Category chips */
+.cat-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0.3rem 0.8rem;
+  margin: 0 -0.8rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
+}
+.cat-chips::-webkit-scrollbar { display: none; }
+.cat-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.cat-chip .cat-icon { font-size: 1rem; line-height: 1; }
+.cat-chip:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.18);
+}
+.cat-chip:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.cat-chip[aria-pressed="true"] {
+  background: #fff;
+  border-color: #fff;
+  color: #1a1a2e;
+}
+.cat-heading {
+  grid-column: 1 / -1;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 1rem 0 0.1rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.cat-heading:first-child { margin-top: 0; }
