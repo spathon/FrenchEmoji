@@ -84,7 +84,7 @@ header p {
   transform: scale(0.93);
 }
 /* Random dialog */
-#random-dialog {
+#random-dialog, #quiz-dialog {
   border: none;
   border-radius: 20px;
   padding: 2rem 2.5rem;
@@ -97,7 +97,7 @@ header p {
   margin: auto;
   animation: dialog-in 0.25s ease;
 }
-#random-dialog::backdrop {
+#random-dialog::backdrop, #quiz-dialog::backdrop {
   background: rgba(0,0,0,0.4);
   backdrop-filter: blur(4px);
 }
@@ -150,13 +150,13 @@ body.show-english #random-dialog .rd-english {
   background: rgba(212,42,66,0.1);
   color: #d42a42;
 }
-#random-dialog .rd-actions {
+#random-dialog .rd-actions, #quiz-dialog .rd-actions {
   display: flex;
   gap: 0.5rem;
   margin-top: 1.2rem;
   justify-content: center;
 }
-#random-dialog .rd-actions button {
+#random-dialog .rd-actions button, #quiz-dialog .rd-actions button {
   border: none;
   border-radius: 12px;
   padding: 0.6rem 1.2rem;
@@ -165,23 +165,67 @@ body.show-english #random-dialog .rd-english {
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
 }
-#random-dialog .rd-actions button:active {
+#random-dialog .rd-actions button:active, #quiz-dialog .rd-actions button:active {
   transform: scale(0.95);
 }
-#random-dialog .rd-another {
+#random-dialog .rd-another, #quiz-dialog .rd-another {
   background: linear-gradient(135deg, #1a4fc9, #a8324a);
   color: #fff;
 }
-#random-dialog .rd-another:hover {
+#random-dialog .rd-another:hover, #quiz-dialog .rd-another:hover {
   opacity: 0.9;
 }
-#random-dialog .rd-close {
+#random-dialog .rd-close, #quiz-dialog .rd-close {
   background: #f0f0f0;
   color: #666;
 }
-#random-dialog .rd-close:hover {
+#random-dialog .rd-close:hover, #quiz-dialog .rd-close:hover {
   background: #e4e4e4;
 }
+/* Quiz dialog */
+#quiz-dialog { max-width: 360px; padding: 1.5rem 1.25rem; }
+#quiz-dialog button { font-family: inherit; }
+#quiz-dialog button:focus-visible { outline: 3px solid #1a4fc9; outline-offset: 2px; }
+.qz-tabs { display: inline-flex; background: #f0f0f0; border-radius: 12px; padding: 3px; }
+.qz-tabs button {
+  border: none; background: transparent; border-radius: 10px; padding: 0.45rem 0.9rem;
+  font-size: 0.85rem; font-weight: 600; color: #666; cursor: pointer; transition: background 0.2s;
+}
+.qz-tabs button[aria-pressed="true"] { background: #fff; color: #1a1a2e; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+.qz-score { font-size: 0.8rem; font-weight: 600; color: #888; margin-top: 0.7rem; }
+.qz-prompt { margin-top: 0.8rem; min-height: 3rem; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.qz-big { font-size: 4.5rem; line-height: 1.2; }
+.qz-word { font-size: 1.3rem; font-weight: 700; color: #1a1a2e; }
+.qz-replay {
+  border: none; border-radius: 12px; padding: 0.6rem 1.2rem; font-size: 1rem; font-weight: 600;
+  cursor: pointer; background: rgba(26,79,201,0.1); color: #1a4fc9;
+}
+.qz-replay:hover { background: rgba(26,79,201,0.18); }
+.qz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-top: 1rem; }
+.qz-choices button {
+  border: 2px solid transparent; border-radius: 14px; cursor: pointer;
+  transition: transform 0.15s, background 0.2s, opacity 0.2s;
+}
+.qz-choices button:not(:disabled):active { transform: scale(0.95); }
+.qz-emoji { font-size: 2.8rem; line-height: 1.2; padding: 0.5rem 0; background: #f4f5f8; }
+.qz-emoji:not(:disabled):hover { background: #e9ebf1; }
+.qz-gender { padding: 0.8rem 0.5rem; font-size: 1rem; font-weight: 700; color: #fff; }
+.qz-gender.masc { background: #1a4fc9; }
+.qz-gender.fem { background: #d42a42; }
+.qz-choices button:disabled { cursor: default; opacity: 0.4; }
+.qz-choices button.correct { opacity: 1; border-color: #1f9d55; box-shadow: 0 0 0 3px rgba(31,157,85,0.25); }
+.qz-emoji.correct { background: rgba(31,157,85,0.12); }
+.qz-choices button.wrong { opacity: 0.7; border-color: #999; border-style: dashed; }
+.qz-feedback { min-height: 4.2rem; margin-top: 0.9rem; }
+.qz-result { font-weight: 700; font-size: 1rem; }
+.qz-result.ok { color: #1f9d55; }
+.qz-result.ko { color: #b3261e; }
+.qz-label { font-size: 1.2rem; font-weight: 700; margin-top: 0.2rem; }
+.qz-label.masc { color: #1a4fc9; }
+.qz-label.fem { color: #d42a42; }
+.qz-label.other { color: #666; }
+.qz-eng { font-size: 0.85rem; color: #999; }
+#quiz-dialog .rd-actions { margin-top: 0.8rem; }
 /* Segmented controls shared */
 .seg-group {
   display: inline-flex;
