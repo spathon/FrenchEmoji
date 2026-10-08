@@ -347,7 +347,11 @@ function speak(text) {
 }
 
 function normalize(str) {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2019\u2018\u02bc`´]/g, "'").toLowerCase().trim();
+}
+
+function matches(term, emoji, label, english) {
+  return normalize(label).includes(term) || normalize(english).includes(term) || emoji.replace(/\uFE0F/g, '').includes(term.replace(/\uFE0F/g, ''));
 }
 
 function render(filter = '') {
@@ -356,7 +360,7 @@ function render(filter = '') {
   let count = 0;
 
   for (const [emoji, label, gender, english] of emojis) {
-    if (term && !normalize(label).includes(term)) continue;
+    if (term && !matches(term, emoji, label, english)) continue;
     if (genderFilter && gender !== genderFilter) continue;
     count++;
     const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
