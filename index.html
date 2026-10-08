@@ -312,6 +312,7 @@ const searchInput = document.getElementById('search');
 const voiceOptions = document.getElementById('voice-options');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
+const randomBtn = document.getElementById('random-btn');
 let selectedVoice = null;
 let genderFilter = '';
 
@@ -350,14 +351,19 @@ function normalize(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
+function matches([, label, gender], term) {
+  if (term && !normalize(label).includes(term)) return false;
+  return !genderFilter || gender === genderFilter;
+}
+
 function render(filter = '') {
   grid.innerHTML = '';
   const term = normalize(filter);
   let count = 0;
 
-  for (const [emoji, label, gender, english] of emojis) {
-    if (term && !normalize(label).includes(term)) continue;
-    if (genderFilter && gender !== genderFilter) continue;
+  for (const entry of emojis) {
+    if (!matches(entry, term)) continue;
+    const [emoji, label, gender, english] = entry;
     count++;
     const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
     const card = document.createElement('div');
@@ -376,6 +382,7 @@ function render(filter = '') {
   if (count === 0) {
     grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
   }
+  randomBtn.disabled = count === 0;
 }
 
 engToggle.addEventListener('change', (e) => {
@@ -402,8 +409,15 @@ const rdFrench = document.getElementById('rd-french');
 const rdEnglish = document.getElementById('rd-english');
 const rdGender = document.getElementById('rd-gender');
 
+let lastRandom = null;
+
 function openRandomDialog() {
-  const entry = emojis[Math.floor(Math.random() * emojis.length)];
+  const pool = emojis.filter(e => matches(e, normalize(searchInput.value)));
+  if (!pool.length) return;
+  let entry;
+  do entry = pool[Math.floor(Math.random() * pool.length)];
+  while (pool.length > 1 && entry === lastRandom);
+  lastRandom = entry;
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
   rdFrench.textContent = label;
@@ -425,7 +439,7 @@ function openRandomDialog() {
   speechSynthesis.speak(speak(label));
 }
 
-document.getElementById('random-btn').addEventListener('click', openRandomDialog);
+randomBtn.addEventListener('click', openRandomDialog);
 document.getElementById('rd-another').addEventListener('click', openRandomDialog);
 document.getElementById('rd-close').addEventListener('click', () => randomDialog.close());
 randomDialog.addEventListener('click', (e) => {
