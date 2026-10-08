@@ -1,5 +1,6 @@
 const CACHE_NAME = 'fr-moji-v4';
-const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg'];
+const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg',
+  './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
