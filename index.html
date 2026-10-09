@@ -4,10 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>French Emoji — Apprends le français avec des émojis</title>
+<meta name="description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="French Emoji">
+<meta property="og:title" content="French Emoji — Apprends le français avec des émojis">
+<meta property="og:description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta property="og:image" content="icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Un lézard émoji sur un drapeau français">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="French Emoji — Apprends le français avec des émojis">
+<meta name="twitter:description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta name="twitter:image" content="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a1628">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -33,11 +48,12 @@
       </div>
       <div id="voice-options"></div>
     </div>
+    <p class="voice-notice" id="voice-notice" role="status" hidden></p>
   </div>
 </header>
 
 <dialog id="random-dialog">
-  <div class="rd-emoji" id="rd-emoji"></div>
+  <button type="button" class="rd-emoji" id="rd-emoji"></button>
   <div class="rd-french" id="rd-french"></div>
   <div class="rd-english" id="rd-english"></div>
   <div class="rd-gender" id="rd-gender"></div>
@@ -600,54 +616,100 @@ const emojis = [
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
 const voiceOptions = document.getElementById('voice-options');
+const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
 let selectedVoice = null;
 let genderFilter = '';
 
+const hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+let frVoices = [];
+
+const voiceLang = v => v.lang.replace('_', '-').toLowerCase();
+const isFrFR = v => voiceLang(v) === 'fr-fr';
+
+// Short button label: "Microsoft Denise Online - French" → "Denise"
+const shortName = v => v.name.replace(/^(Microsoft|Apple|Google)\s+(?=\S)/i, '').split(/[\s(-]/)[0];
+
 function loadVoices() {
+  if (!hasSpeech) return;
   const voices = speechSynthesis.getVoices();
-  const frVoices = voices.filter(v => v.lang.startsWith('fr'));
-  const thomas = frVoices.find(v => v.name.includes('Thomas'));
-  const amelie = frVoices.find(v => v.name.includes('Amelie') || v.name.includes('Amélie'));
-
+  frVoices = voices.filter(v => voiceLang(v).startsWith('fr'));
+  frVoices = [...frVoices.filter(isFrFR), ...frVoices.filter(v => !isFrFR(v))];
   voiceOptions.innerHTML = '';
+  if (!frVoices.length) { selectedVoice = null; return; }
+  voiceNotice.hidden = true;
 
-  if (thomas && amelie) {
-    voiceOptions.className = 'voice-radios';
-    [[amelie, 'Amelie'], [thomas, 'Thomas']].forEach(([voice, name], i) => {
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="radio" name="voice" value="${i}" ${i === 0 ? 'checked' : ''}><span>${name}</span>`;
-      label.querySelector('input').addEventListener('change', () => { selectedVoice = voice; });
-      voiceOptions.appendChild(label);
+  // Amélie and Thomas when available, otherwise the best two other French voices
+  const amelie = frVoices.find(v => /am[eé]lie/i.test(v.name));
+  const thomas = frVoices.find(v => /thomas/i.test(v.name));
+  const pair = [amelie, thomas].filter(Boolean);
+  for (const v of frVoices) if (pair.length < 2 && !pair.includes(v)) pair.push(v);
+
+  const saved = store.get('fr-moji-voice');
+  selectedVoice = pair.find(v => v.name === saved) || pair[0];
+  if (pair.length < 2) return;
+
+  let names = pair.map(v => v === amelie ? 'Amélie' : v === thomas ? 'Thomas' : shortName(v));
+  if (names[0] === names[1]) names = ['Voix 1', 'Voix 2'];
+  voiceOptions.className = 'voice-radios';
+  pair.forEach((voice, i) => {
+    const label = document.createElement('label');
+    label.title = voice.name;
+    label.innerHTML = `<input type="radio" name="voice" value="${i}"><span></span>`;
+    label.querySelector('span').textContent = names[i];
+    const input = label.querySelector('input');
+    input.checked = voice === selectedVoice;
+    input.addEventListener('change', () => {
+      selectedVoice = voice;
+      store.set('fr-moji-voice', voice.name);
     });
-    selectedVoice = amelie;
-  } else {
-    selectedVoice = frVoices[0] || null;
-  }
+    voiceOptions.appendChild(label);
+  });
 }
 
-function speak(text) {
+function showVoiceNotice(msg) {
+  voiceNotice.textContent = msg;
+  voiceNotice.hidden = false;
+}
+
+function checkFrenchVoice() {
+  if (!frVoices.length) showVoiceNotice('Aucune voix française trouvée sur cet appareil. Pour entendre la prononciation, installe une voix française dans les réglages du système (Langue ou Synthèse vocale), puis recharge la page.');
+}
+
+function say(text, onend) {
+  if (!hasSpeech) { if (onend) onend(); return; }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'fr-FR';
+  utter.lang = selectedVoice ? selectedVoice.lang : 'fr-FR';
   utter.rate = 0.9;
   if (selectedVoice) utter.voice = selectedVoice;
-  return utter;
+  if (onend) utter.onend = onend;
+  speechSynthesis.speak(utter);
 }
 
 function normalize(str) {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2019\u2018\u02bc`´]/g, "'").toLowerCase().trim();
+}
+
+function stripVS(str) {
+  return str.replace(/\uFE0F/g, '');
 }
 
 // Build every card once; filtering only toggles `hidden`
 const cards = emojis.map(([emoji, label, gender, english]) => {
   const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
-  const card = document.createElement('div');
+  const card = document.createElement('button');
+  card.type = 'button';
   card.className = 'card';
   card.dataset.label = label;
-  card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
-  return { card, term: normalize(label), gender };
+  card.setAttribute('aria-label', `${label} — écouter`);
+  card.innerHTML = `<span class="emoji" aria-hidden="true">${emoji}</span><span class="label ${cls}">${label}</span><span class="eng">${english}</span>`;
+  return { card, gender, label: normalize(label), english: normalize(english), emoji: stripVS(emoji) };
 });
 
 const noResults = document.createElement('div');
@@ -661,8 +723,11 @@ function applyFilter() {
   const term = normalize(searchInput.value);
   let count = 0;
 
-  for (const { card, term: cardTerm, gender } of cards) {
-    const show = (!term || cardTerm.includes(term)) && (!genderFilter || gender === genderFilter);
+  const emojiTerm = stripVS(term);
+
+  for (const { card, gender, label, english, emoji } of cards) {
+    const textMatch = !term || label.includes(term) || english.includes(term) || emoji.includes(emojiTerm);
+    const show = textMatch && (!genderFilter || gender === genderFilter);
     card.hidden = !show;
     if (show) count++;
   }
@@ -675,9 +740,7 @@ grid.addEventListener('click', (e) => {
   if (!card) return;
   grid.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
   card.classList.add('speaking');
-  const utter = speak(card.dataset.label);
-  utter.onend = () => card.classList.remove('speaking');
-  speechSynthesis.speak(utter);
+  say(card.dataset.label, () => card.classList.remove('speaking'));
 });
 
 engToggle.addEventListener('change', (e) => {
@@ -691,8 +754,16 @@ genderRadios.forEach(radio => {
   });
 });
 
-speechSynthesis.onvoiceschanged = loadVoices;
-loadVoices();
+if (hasSpeech) {
+  speechSynthesis.addEventListener('voiceschanged', () => {
+    loadVoices();
+    if (speechSynthesis.getVoices().length) checkFrenchVoice();
+  });
+  loadVoices();
+  setTimeout(() => { loadVoices(); checkFrenchVoice(); }, 1500);
+} else {
+  showVoiceNotice('Ton navigateur ne prend pas en charge la synthèse vocale : la prononciation ne sera pas disponible.');
+}
 
 let searchTimer;
 searchInput.addEventListener('input', () => {
@@ -711,6 +782,7 @@ function openRandomDialog() {
   const entry = emojis[Math.floor(Math.random() * emojis.length)];
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
+  rdEmoji.setAttribute('aria-label', `${label} — réécouter`);
   rdFrench.textContent = label;
   rdEnglish.textContent = english;
   if (gender === 'm') {
@@ -725,9 +797,9 @@ function openRandomDialog() {
     rdGender.textContent = '\u00A0';
     rdGender.style.visibility = 'hidden';
   }
-  rdEmoji.onclick = () => { speechSynthesis.speak(speak(label)); };
+  rdEmoji.onclick = () => say(label);
   if (!randomDialog.open) randomDialog.showModal();
-  speechSynthesis.speak(speak(label));
+  say(label);
 }
 
 document.getElementById('random-btn').addEventListener('click', openRandomDialog);
