@@ -51,7 +51,7 @@
         <span class="toggle-slider"></span>
         🐢 Lent
       </label>
-      <select id="voice-select" class="voice-select" aria-label="Voix" hidden></select>
+      <div id="voice-options"></div>
     </div>
     <p class="voice-notice" id="voice-notice" role="status" hidden></p>
   </div>
@@ -330,7 +330,7 @@ const emojis = [
 
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
-const voiceSelect = document.getElementById('voice-select');
+const voiceOptions = document.getElementById('voice-options');
 const slowToggle = document.getElementById('slow-toggle');
 const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
@@ -350,27 +350,44 @@ slowToggle.checked = slow;
 const voiceLang = v => v.lang.replace('_', '-').toLowerCase();
 const isFrFR = v => voiceLang(v) === 'fr-fr';
 
+// Short button label: "Microsoft Denise Online - French" → "Denise"
+const shortName = v => v.name.replace(/^(Microsoft|Apple|Google)\s+(?=\S)/i, '').split(/[\s(-]/)[0];
+
 function loadVoices() {
   if (!hasSpeech) return;
   const voices = speechSynthesis.getVoices();
   frVoices = voices.filter(v => voiceLang(v).startsWith('fr'));
   frVoices = [...frVoices.filter(isFrFR), ...frVoices.filter(v => !isFrFR(v))];
-  if (!frVoices.length) {
-    selectedVoice = null;
-    voiceSelect.hidden = true;
-    return;
-  }
+  voiceOptions.innerHTML = '';
+  if (!frVoices.length) { selectedVoice = null; return; }
   voiceNotice.hidden = true;
+
+  // Amélie and Thomas when available, otherwise the best two other French voices
+  const amelie = frVoices.find(v => /am[eé]lie/i.test(v.name));
+  const thomas = frVoices.find(v => /thomas/i.test(v.name));
+  const pair = [amelie, thomas].filter(Boolean);
+  for (const v of frVoices) if (pair.length < 2 && !pair.includes(v)) pair.push(v);
+
   const saved = store.get('fr-moji-voice');
-  selectedVoice = frVoices.find(v => v.name === saved)
-    || frVoices.find(v => /am[eé]lie/i.test(v.name))
-    || frVoices.find(isFrFR) || frVoices[0];
-  voiceSelect.innerHTML = '';
-  frVoices.forEach((v, i) => {
-    const name = isFrFR(v) ? v.name : `${v.name} (${v.lang.replace('_', '-')})`;
-    voiceSelect.add(new Option(name, i, false, v === selectedVoice));
+  selectedVoice = pair.find(v => v.name === saved) || pair[0];
+  if (pair.length < 2) return;
+
+  let names = pair.map(v => v === amelie ? 'Amélie' : v === thomas ? 'Thomas' : shortName(v));
+  if (names[0] === names[1]) names = ['Voix 1', 'Voix 2'];
+  voiceOptions.className = 'voice-radios';
+  pair.forEach((voice, i) => {
+    const label = document.createElement('label');
+    label.title = voice.name;
+    label.innerHTML = `<input type="radio" name="voice" value="${i}"><span></span>`;
+    label.querySelector('span').textContent = names[i];
+    const input = label.querySelector('input');
+    input.checked = voice === selectedVoice;
+    input.addEventListener('change', () => {
+      selectedVoice = voice;
+      store.set('fr-moji-voice', voice.name);
+    });
+    voiceOptions.appendChild(label);
   });
-  voiceSelect.hidden = frVoices.length < 2;
 }
 
 function showVoiceNotice(msg) {
@@ -381,11 +398,6 @@ function showVoiceNotice(msg) {
 function checkFrenchVoice() {
   if (!frVoices.length) showVoiceNotice('Aucune voix française trouvée sur cet appareil. Pour entendre la prononciation, installe une voix française dans les réglages du système (Langue ou Synthèse vocale), puis recharge la page.');
 }
-
-voiceSelect.addEventListener('change', () => {
-  selectedVoice = frVoices[voiceSelect.value] || null;
-  if (selectedVoice) store.set('fr-moji-voice', selectedVoice.name);
-});
 
 slowToggle.addEventListener('change', () => {
   slow = slowToggle.checked;
