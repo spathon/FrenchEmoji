@@ -34,6 +34,7 @@
     <div class="search-row">
       <input type="text" id="search" placeholder="Rechercher..." autocomplete="off">
       <button class="random-btn" id="random-btn" title="Émoji aléatoire" aria-label="Random emoji">🎲</button>
+      <button class="random-btn" id="quiz-btn" title="Quiz" aria-label="Quiz">🎯</button>
     </div>
     <div class="toggle-bar">
       <label class="toggle-label">
@@ -61,6 +62,21 @@
   <div class="rd-actions">
     <button class="rd-close" id="rd-close">Fermer</button>
     <button class="rd-another" id="rd-another">🎲 Encore !</button>
+  </div>
+</dialog>
+
+<dialog id="quiz-dialog" aria-label="Quiz">
+  <div class="qz-tabs" role="group" aria-label="Type de quiz">
+    <button data-mode="listen" aria-pressed="true">🎧 Écoute</button>
+    <button data-mode="gender" aria-pressed="false">Le ou la ?</button>
+  </div>
+  <div class="qz-score" id="qz-score"></div>
+  <div class="qz-prompt" id="qz-prompt"></div>
+  <div class="qz-choices" id="qz-choices"></div>
+  <div class="qz-feedback" id="qz-feedback" aria-live="polite"></div>
+  <div class="rd-actions">
+    <button class="rd-close" id="qz-close">Fermer</button>
+    <button class="rd-another" id="qz-next" hidden>Suivant →</button>
   </div>
 </dialog>
 
@@ -872,6 +888,109 @@ document.getElementById('rd-close').addEventListener('click', () => randomDialog
 randomDialog.addEventListener('click', (e) => {
   if (e.target === randomDialog) randomDialog.close();
 });
+
+// Quiz dialog
+const quizDialog = document.getElementById('quiz-dialog');
+const qzPrompt = document.getElementById('qz-prompt');
+const qzChoices = document.getElementById('qz-choices');
+const qzFeedback = document.getElementById('qz-feedback');
+const qzScore = document.getElementById('qz-score');
+const qzNext = document.getElementById('qz-next');
+const ARTICLE = /^(le |la |les |l'|l’)/i;
+let quizMode = 'listen', quizCurrent = null, score = 0, total = 0, streak = 0;
+
+const canSpeak = () => hasSpeech && speechSynthesis.getVoices().length > 0;
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const shuffle = (arr) => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(v => v[1]);
+const isGendered = (e) => (e.gender === 'm' || e.gender === 'f') && ARTICLE.test(e.label);
+
+function updateScore() {
+  qzScore.textContent = `Score : ${score} / ${total} · Série : ${streak}${streak >= 3 ? ' 🔥' : ''}`;
+}
+
+function quizButton(html, cls, isRight) {
+  const b = document.createElement('button');
+  b.className = cls;
+  b.innerHTML = html;
+  b.dataset.right = isRight ? '1' : '';
+  b.addEventListener('click', () => answerQuiz(b));
+  qzChoices.appendChild(b);
+  return b;
+}
+
+function nextQuestion() {
+  const ok = (e) => quizMode === 'listen' || isGendered(e);
+  let pool = cards.filter(c => !c.card.hidden).map(c => c.entry).filter(ok);
+  if (!pool.length) pool = entries.filter(ok);
+  let entry = pick(pool);
+  if (pool.length > 1 && entry === quizCurrent) entry = pick(pool.filter(e => e !== quizCurrent));
+  quizCurrent = entry;
+  const { emoji, label, gender } = entry;
+  qzChoices.innerHTML = '';
+  qzFeedback.innerHTML = '';
+  qzNext.hidden = true;
+  qzChoices.className = 'qz-choices ' + quizMode;
+  if (quizMode === 'listen') {
+    const opts = [entry];
+    for (const e of shuffle(pool.length >= 4 ? pool : entries)) {
+      if (opts.length === 4) break;
+      if (!opts.some(o => o.emoji === e.emoji || o.label === e.label)) opts.push(e);
+    }
+    if (canSpeak()) {
+      qzPrompt.innerHTML = '<button class="qz-replay">🔊 Réécouter</button>';
+      qzPrompt.firstChild.onclick = () => say(label);
+    } else {
+      qzPrompt.innerHTML = '<div class="qz-word"></div>';
+      qzPrompt.firstChild.textContent = label;
+    }
+    shuffle(opts).forEach(o => quizButton(o.emoji, 'qz-emoji', o === entry));
+    if (canSpeak()) say(label);
+  } else {
+    qzPrompt.innerHTML = `<div class="qz-big">${emoji}</div><div class="qz-word"></div>`;
+    qzPrompt.lastChild.textContent = label.replace(ARTICLE, '');
+    quizButton('masculin', 'qz-gender masc', gender === 'm');
+    quizButton('féminin', 'qz-gender fem', gender === 'f');
+  }
+  updateScore();
+  qzChoices.firstChild.focus();
+}
+
+function answerQuiz(btn) {
+  if (!qzNext.hidden) return;
+  const { label, gender, english } = quizCurrent;
+  const ok = btn.dataset.right === '1';
+  total++;
+  if (ok) { score++; streak++; } else streak = 0;
+  qzChoices.querySelectorAll('button').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.right) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
+  qzFeedback.innerHTML = `<div class="qz-result ${ok ? 'ok' : 'ko'}">${ok ? '✅ Bravo !' : '❌ Raté…'}</div><div class="qz-label ${cls}"></div><div class="qz-eng"></div>`;
+  qzFeedback.children[1].textContent = label;
+  qzFeedback.children[2].textContent = english;
+  updateScore();
+  qzNext.hidden = false;
+  qzNext.focus();
+  say(label);
+}
+
+quizDialog.querySelectorAll('.qz-tabs button').forEach(b => b.addEventListener('click', () => {
+  quizMode = b.dataset.mode;
+  quizDialog.querySelectorAll('.qz-tabs button').forEach(t => t.setAttribute('aria-pressed', t === b));
+  nextQuestion();
+}));
+document.getElementById('quiz-btn').addEventListener('click', () => {
+  quizDialog.showModal();
+  nextQuestion();
+});
+qzNext.addEventListener('click', nextQuestion);
+document.getElementById('qz-close').addEventListener('click', () => quizDialog.close());
+quizDialog.addEventListener('click', (e) => {
+  if (e.target === quizDialog) quizDialog.close();
+});
+quizDialog.addEventListener('close', () => { if (hasSpeech) speechSynthesis.cancel(); });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js');
