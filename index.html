@@ -46,11 +46,6 @@
         <label class="masc-label"><input type="radio" name="gender" value="m"><span>Masc</span></label>
         <label class="fem-label"><input type="radio" name="gender" value="f"><span>Fém</span></label>
       </div>
-      <label class="toggle-label">
-        <input type="checkbox" id="slow-toggle">
-        <span class="toggle-slider"></span>
-        🐢 Lent
-      </label>
       <div id="voice-options"></div>
     </div>
     <p class="voice-notice" id="voice-notice" role="status" hidden></p>
@@ -621,7 +616,6 @@ const emojis = [
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
 const voiceOptions = document.getElementById('voice-options');
-const slowToggle = document.getElementById('slow-toggle');
 const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
@@ -634,8 +628,6 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 };
 let frVoices = [];
-let slow = store.get('fr-moji-slow') === '1';
-slowToggle.checked = slow;
 
 const voiceLang = v => v.lang.replace('_', '-').toLowerCase();
 const isFrFR = v => voiceLang(v) === 'fr-fr';
@@ -689,17 +681,12 @@ function checkFrenchVoice() {
   if (!frVoices.length) showVoiceNotice('Aucune voix française trouvée sur cet appareil. Pour entendre la prononciation, installe une voix française dans les réglages du système (Langue ou Synthèse vocale), puis recharge la page.');
 }
 
-slowToggle.addEventListener('change', () => {
-  slow = slowToggle.checked;
-  store.set('fr-moji-slow', slow ? '1' : '0');
-});
-
 function say(text, onend) {
   if (!hasSpeech) { if (onend) onend(); return; }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = selectedVoice ? selectedVoice.lang : 'fr-FR';
-  utter.rate = slow ? 0.6 : 0.9;
+  utter.rate = 0.9;
   if (selectedVoice) utter.voice = selectedVoice;
   if (onend) utter.onend = onend;
   speechSynthesis.speak(utter);
