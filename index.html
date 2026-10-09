@@ -619,6 +619,7 @@ const voiceOptions = document.getElementById('voice-options');
 const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
+const randomBtn = document.getElementById('random-btn');
 let selectedVoice = null;
 let genderFilter = '';
 
@@ -733,6 +734,7 @@ function applyFilter() {
   }
 
   noResults.hidden = count > 0;
+  randomBtn.disabled = count === 0;
 }
 
 grid.addEventListener('click', (e) => {
@@ -778,8 +780,15 @@ const rdFrench = document.getElementById('rd-french');
 const rdEnglish = document.getElementById('rd-english');
 const rdGender = document.getElementById('rd-gender');
 
+let lastRandom = null;
+
 function openRandomDialog() {
-  const entry = emojis[Math.floor(Math.random() * emojis.length)];
+  const pool = emojis.filter((_, i) => !cards[i].card.hidden);
+  if (!pool.length) return;
+  let entry;
+  do entry = pool[Math.floor(Math.random() * pool.length)];
+  while (pool.length > 1 && entry === lastRandom);
+  lastRandom = entry;
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
   rdEmoji.setAttribute('aria-label', `${label} — réécouter`);
@@ -802,7 +811,7 @@ function openRandomDialog() {
   say(label);
 }
 
-document.getElementById('random-btn').addEventListener('click', openRandomDialog);
+randomBtn.addEventListener('click', openRandomDialog);
 document.getElementById('rd-another').addEventListener('click', openRandomDialog);
 document.getElementById('rd-close').addEventListener('click', () => randomDialog.close());
 randomDialog.addEventListener('click', (e) => {
