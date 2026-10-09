@@ -242,6 +242,22 @@ body.show-english #random-dialog .rd-english {
 .qz-label.other { color: #666; }
 .qz-eng { font-size: 0.85rem; color: #999; }
 #quiz-dialog .rd-actions { margin-top: 0.8rem; }
+#qz-play[hidden], .qz-summary[hidden] { display: none; }
+.qz-summary { margin-top: 1rem; }
+.qz-summary-score { font-size: 2.6rem; font-weight: 800; line-height: 1.1; color: #1a1a2e; font-variant-numeric: tabular-nums; }
+.qz-summary-msg { font-size: 0.9rem; font-weight: 600; color: #666; margin-top: 0.3rem; }
+.qz-missed { margin-top: 1rem; text-align: left; max-height: 40vh; overflow-y: auto; }
+.qz-missed-title { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: #999; font-weight: 700; margin-bottom: 0.35rem; }
+.qz-missed-word {
+  display: flex; align-items: center; gap: 0.6rem; width: 100%;
+  border: none; border-radius: 10px; background: #f4f5f8; padding: 0.4rem 0.6rem; margin-top: 0.3rem;
+  font-size: 0.95rem; font-weight: 700; text-align: left; cursor: pointer;
+}
+.qz-missed-word:hover { background: #e9ebf1; }
+.qz-missed-word > span:first-child { font-size: 1.5rem; line-height: 1.2; }
+.qz-missed-word .masc { color: #1a4fc9; }
+.qz-missed-word .fem { color: #d42a42; }
+.qz-missed-word .other { color: #666; }
 /* Segmented controls shared */
 .seg-group {
   display: inline-flex;
@@ -646,6 +662,10 @@ body.show-english .card .eng {
 .cat-chip[aria-pressed="true"] > span:last-child { display: inline; }
 .fav-chip { padding: 0.3rem 0.75rem; border-style: dashed; }
 .fav-chip[aria-pressed="true"] { background: #f5b400; border-color: #f5b400; color: #1a1a2e; }
+.review-chip { margin-left: -0.3rem; }
+.review-chip[aria-pressed="true"] { background: #e8711a; border-color: #e8711a; color: #fff; }
+.review-chip .known-count { margin-left: 0.3rem; }
+.card.review { border-color: rgba(232,113,26,0.55); background: #fff8f2; }
 .cat-heading {
   scroll-margin-top: 58px;
   grid-column: 1 / -1;
