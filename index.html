@@ -88,6 +88,8 @@
 <dialog id="quiz-dialog" aria-label="Quiz">
   <div class="qz-tabs" role="group" aria-label="Type de quiz">
     <button data-mode="listen" aria-pressed="true">🎧 Écoute</button>
+    <button data-mode="word" aria-pressed="false">🔤 Le mot</button>
+    <button data-mode="spell" aria-pressed="false">✍️ Écrire</button>
     <button data-mode="gender" aria-pressed="false">Le ou la ?</button>
   </div>
   <div class="qz-score" id="qz-score"></div>
@@ -705,6 +707,7 @@ function updateProgress() {
   const r = countIn(review);
   reviewCount.textContent = r ? `· ${r}` : '';
   reviewChip.title = r ? `${r} mot${r > 1 ? 's' : ''} raté${r > 1 ? 's' : ''} au quiz` : 'Les mots ratés au quiz apparaissent ici';
+  updateCategoryProgress();
 }
 
 function setMarkBtn(btn, type, on) {
@@ -847,9 +850,24 @@ function stripVS(str) {
 const headings = new Map(categories.map(({ name }) => {
   const heading = document.createElement('h2');
   heading.className = 'cat-heading';
-  heading.textContent = name;
+  heading.innerHTML = '<span class="cat-name"></span><span class="cat-progress"><span class="cat-progress-text"></span><span class="cat-bar" aria-hidden="true"><span class="cat-bar-fill"></span></span></span>';
+  heading.firstChild.textContent = name;
   return [name, heading];
 }));
+
+// Known words per category, shown as "12 / 48" and a bar on each heading
+const catEmojis = new Map(categories.map(({ name }) => [name, entries.filter(e => e.category === name).map(e => e.emoji)]));
+function updateCategoryProgress() {
+  for (const [name, heading] of headings) {
+    const list = catEmojis.get(name);
+    let k = 0;
+    for (const e of list) if (known.has(e)) k++;
+    heading.querySelector('.cat-progress-text').textContent = `${k} / ${list.length}`;
+    heading.querySelector('.cat-bar-fill').style.width = `${100 * k / list.length}%`;
+    heading.querySelector('.cat-progress').title = `${k} mot${k > 1 ? 's' : ''} appris sur ${list.length}`;
+    heading.classList.toggle('done', k === list.length);
+  }
+}
 
 const cards = entries.map((entry) => {
   const { emoji, label, gender, english, category } = entry;
@@ -917,8 +935,11 @@ grid.addEventListener('click', (e) => {
   say(card.dataset.label, () => card.classList.remove('speaking'));
 });
 
+engToggle.checked = store.get('fr-moji-english') === '1';
+document.body.classList.toggle('show-english', engToggle.checked);
 engToggle.addEventListener('change', (e) => {
   document.body.classList.toggle('show-english', e.target.checked);
+  store.set('fr-moji-english', e.target.checked ? '1' : '0');
 });
 
 genderRadios.forEach(radio => {
@@ -1129,7 +1150,7 @@ const isGendered = (e) => (e.gender === 'm' || e.gender === 'f') && SINGULAR_ART
 
 // Words the quiz can ask: what the grid currently shows, or everything when the filter hides it all
 function quizPool() {
-  const ok = (e) => quizMode === 'listen' || isGendered(e);
+  const ok = quizMode === 'gender' ? isGendered : () => true;
   const pool = cards.filter(c => !c.wrap.hidden).map(c => c.entry).filter(ok);
   return pool.length ? pool : entries.filter(ok);
 }
@@ -1196,32 +1217,57 @@ function showSummary() {
   qzAgain.focus();
 }
 
-function quizButton(html, cls, isRight) {
+function quizButton(text, cls, isRight) {
   const b = document.createElement('button');
   b.className = cls;
-  b.innerHTML = html;
+  b.textContent = text;
   b.dataset.right = isRight ? '1' : '';
-  b.addEventListener('click', () => answerQuiz(b));
+  b.addEventListener('click', () => chooseAnswer(b));
   qzChoices.appendChild(b);
   return b;
+}
+
+// The word plus three others, none sharing its emoji or label; `nearby` prefers the same category
+function choices(entry, nearby) {
+  const pool = quizPool();
+  const ranked = nearby ? [...shuffle(pool.filter(e => e.category === entry.category)), ...shuffle(pool)] : shuffle(pool);
+  const opts = [entry];
+  for (const e of [...ranked, ...shuffle(entries)]) {
+    if (opts.length === 4) break;
+    if (!opts.some(o => o.emoji === e.emoji || o.label === e.label)) opts.push(e);
+  }
+  return shuffle(opts);
+}
+
+// Typed answers: case, accents, apostrophes, hyphens and the œ ligature don't count against you
+const tidy = (s) => s.replace(/[\u2019\u2018\u02bc`´]/g, "'").toLowerCase().replace(/\s+/g, ' ').trim();
+const fold = (s) => normalize(s).replace(/œ/g, 'oe').replace(/æ/g, 'ae').replace(/[-\s]+/g, ' ').trim();
+function checkSpelling(form) {
+  const input = form.querySelector('input');
+  if (!input.value.trim()) { input.focus(); return; }
+  const { label } = quizCurrent;
+  const typed = fold(input.value), want = fold(label);
+  let ok = true, note = '';
+  if (tidy(input.value) === tidy(label)) note = '';
+  else if (typed === want) note = 'Presque ! Regarde bien l’orthographe';
+  else if (!ARTICLE.test(typed) && typed === want.replace(ARTICLE, '').trim()) note = 'Presque ! N’oublie pas l’article';
+  else ok = false;
+  input.disabled = true;
+  form.querySelector('button').disabled = true;
+  input.classList.add(ok ? 'correct' : 'wrong');
+  answerQuiz(ok, note);
 }
 
 function nextQuestion() {
   const entry = quizQueue[quizIndex];
   quizCurrent = entry;
-  const { emoji, label, gender } = entry;
+  const { emoji, label, gender, english } = entry;
   qzChoices.innerHTML = '';
   qzFeedback.innerHTML = '';
   qzNext.hidden = true;
   qzNext.textContent = quizIndex + 1 < quizQueue.length ? 'Suivant →' : 'Résultat →';
   qzChoices.className = 'qz-choices ' + quizMode;
   if (quizMode === 'listen') {
-    const pool = quizPool();
-    const opts = [entry];
-    for (const e of shuffle(pool.length >= 4 ? pool : entries)) {
-      if (opts.length === 4) break;
-      if (!opts.some(o => o.emoji === e.emoji || o.label === e.label)) opts.push(e);
-    }
     if (canSpeak()) {
       qzPrompt.innerHTML = '<button class="qz-replay">🔊 Réécouter</button>';
       qzPrompt.firstChild.onclick = () => say(label);
@@ -1229,22 +1275,44 @@ function nextQuestion() {
       qzPrompt.innerHTML = '<div class="qz-word"></div>';
       qzPrompt.firstChild.textContent = label;
     }
-    shuffle(opts).forEach(o => quizButton(o.emoji, 'qz-emoji', o === entry));
+    choices(entry, false).forEach(o => quizButton(o.emoji, 'qz-emoji', o === entry));
     if (canSpeak()) say(label);
+  } else if (quizMode === 'word') {
+    qzPrompt.innerHTML = '<div class="qz-big"></div>';
+    qzPrompt.firstChild.textContent = emoji;
+    choices(entry, true).forEach(o => quizButton(o.label, 'qz-text', o === entry));
+  } else if (quizMode === 'spell') {
+    qzPrompt.innerHTML = '<div class="qz-big"></div><div class="qz-hint"></div>';
+    qzPrompt.firstChild.textContent = emoji;
+    qzPrompt.lastChild.textContent = english;
+    const form = document.createElement('form');
+    form.className = 'qz-spell';
+    form.innerHTML = '<input type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" lang="fr" placeholder="le / la … ?" aria-label="Le mot en français"><button type="submit">Valider</button>';
+    form.addEventListener('submit', (e) => { e.preventDefault(); checkSpelling(form); });
+    qzChoices.appendChild(form);
   } else {
-    qzPrompt.innerHTML = `<div class="qz-big">${emoji}</div><div class="qz-word"></div>`;
+    qzPrompt.innerHTML = '<div class="qz-big"></div><div class="qz-word"></div>';
+    qzPrompt.firstChild.textContent = emoji;
     qzPrompt.lastChild.textContent = label.replace(ARTICLE, '');
     quizButton('masculin', 'qz-gender masc', gender === 'm');
     quizButton('féminin', 'qz-gender fem', gender === 'f');
   }
   updateScore();
-  qzChoices.firstChild.focus();
+  qzChoices.querySelector('input, button').focus();
 }
 
-function answerQuiz(btn) {
+function chooseAnswer(btn) {
   if (!qzNext.hidden) return;
+  qzChoices.querySelectorAll('button').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.right) b.classList.add('correct');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  answerQuiz(btn.dataset.right === '1');
+}
+
+function answerQuiz(ok, note = '') {
   const { emoji, label, gender, english } = quizCurrent;
-  const ok = btn.dataset.right === '1';
   if (ok) { score++; streak++; } else streak = 0;
   // A miss puts the word in the review list (and takes back a "known" mark); a hit clears it
   let changed = false;
@@ -1262,13 +1330,9 @@ function answerQuiz(btn) {
     syncMarks(emoji);
     applyFilter();
   }
-  qzChoices.querySelectorAll('button').forEach(b => {
-    b.disabled = true;
-    if (b.dataset.right) b.classList.add('correct');
-    else if (b === btn) b.classList.add('wrong');
-  });
   const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
-  qzFeedback.innerHTML = `<div class="qz-result ${ok ? 'ok' : 'ko'}">${ok ? '✅ Bravo !' : '❌ Raté…'}</div><div class="qz-label ${cls}"></div><div class="qz-eng"></div>`;
+  qzFeedback.innerHTML = `<div class="qz-result ${ok ? 'ok' : 'ko'}"></div><div class="qz-label ${cls}"></div><div class="qz-eng"></div>`;
+  qzFeedback.children[0].textContent = ok ? `✅ ${note || 'Bravo !'}` : '❌ Raté…';
   qzFeedback.children[1].textContent = label;
   qzFeedback.children[2].textContent = english;
   updateScore();
