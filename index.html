@@ -640,33 +640,45 @@ function normalize(str) {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
-function render(filter = '') {
-  grid.innerHTML = '';
-  const term = normalize(filter);
+// Build every card once; filtering only toggles `hidden`
+const cards = emojis.map(([emoji, label, gender, english]) => {
+  const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.label = label;
+  card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
+  return { card, term: normalize(label), gender };
+});
+
+const noResults = document.createElement('div');
+noResults.className = 'no-results';
+noResults.textContent = 'Aucun résultat trouvé';
+noResults.hidden = true;
+
+grid.append(...cards.map(c => c.card), noResults);
+
+function applyFilter() {
+  const term = normalize(searchInput.value);
   let count = 0;
 
-  for (const [emoji, label, gender, english] of emojis) {
-    if (term && !normalize(label).includes(term)) continue;
-    if (genderFilter && gender !== genderFilter) continue;
-    count++;
-    const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
-    card.addEventListener('click', () => {
-      document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
-      card.classList.add('speaking');
-      const utter = speak(label);
-      utter.onend = () => card.classList.remove('speaking');
-      speechSynthesis.speak(utter);
-    });
-    grid.appendChild(card);
+  for (const { card, term: cardTerm, gender } of cards) {
+    const show = (!term || cardTerm.includes(term)) && (!genderFilter || gender === genderFilter);
+    card.hidden = !show;
+    if (show) count++;
   }
 
-  if (count === 0) {
-    grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
-  }
+  noResults.hidden = count > 0;
 }
+
+grid.addEventListener('click', (e) => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  grid.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
+  card.classList.add('speaking');
+  const utter = speak(card.dataset.label);
+  utter.onend = () => card.classList.remove('speaking');
+  speechSynthesis.speak(utter);
+});
 
 engToggle.addEventListener('change', (e) => {
   document.body.classList.toggle('show-english', e.target.checked);
@@ -675,15 +687,18 @@ engToggle.addEventListener('change', (e) => {
 genderRadios.forEach(radio => {
   radio.addEventListener('change', () => {
     genderFilter = radio.value;
-    render(searchInput.value);
+    applyFilter();
   });
 });
 
 speechSynthesis.onvoiceschanged = loadVoices;
 loadVoices();
 
-searchInput.addEventListener('input', e => render(e.target.value));
-render();
+let searchTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(applyFilter, 100);
+});
 
 // Random emoji dialog
 const randomDialog = document.getElementById('random-dialog');
