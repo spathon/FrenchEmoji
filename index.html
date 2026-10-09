@@ -4,10 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>French Emoji — Apprends le français avec des émojis</title>
+<meta name="description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="French Emoji">
+<meta property="og:title" content="French Emoji — Apprends le français avec des émojis">
+<meta property="og:description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta property="og:image" content="icon-512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:image:alt" content="Un lézard émoji sur un drapeau français">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="French Emoji — Apprends le français avec des émojis">
+<meta name="twitter:description" content="Apprends le vocabulaire français avec des émojis : clique sur un émoji pour entendre sa prononciation, découvre son genre (masculin ou féminin) et sa traduction anglaise.">
+<meta name="twitter:image" content="icon-512.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a1628">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -33,11 +48,12 @@
       </div>
       <div id="voice-options"></div>
     </div>
+    <p class="voice-notice" id="voice-notice" role="status" hidden></p>
   </div>
 </header>
 
 <dialog id="random-dialog">
-  <div class="rd-emoji" id="rd-emoji"></div>
+  <button type="button" class="rd-emoji" id="rd-emoji"></button>
   <div class="rd-french" id="rd-french"></div>
   <div class="rd-english" id="rd-english"></div>
   <div class="rd-gender" id="rd-gender"></div>
@@ -58,6 +74,7 @@ const emojis = [
   ["🫐","la myrtille","f","blueberry"],["🍒","la cerise","f","cherry"],["🍑","la pêche","f","peach"],["🥭","la mangue","f","mango"],
   ["🍍","l'ananas","m","pineapple"],["🥥","la noix de coco","f","coconut"],["🥝","le kiwi","m","kiwi"],["🍈","le melon","m","melon"],
   ["🫒","l'olive","f","olive"],["🥜","la cacahuète","f","peanut"],["🌰","la châtaigne","f","chestnut"],["🫘","le haricot","m","bean"],
+  ["🍋‍🟩","le citron vert","m","lime"],["🍏","la pomme verte","f","green apple"],
 
   // Légumes
   ["🥕","la carotte","f","carrot"],["🌽","le maïs","m","corn"],["🥦","le brocoli","m","broccoli"],["🥒","le concombre","m","cucumber"],
@@ -65,6 +82,7 @@ const emojis = [
   ["🥔","la pomme de terre","f","potato"],["🍆","l'aubergine","f","eggplant"],["🌶️","le piment","m","chili pepper"],["🥑","l'avocat","m","avocado"],
   ["🫑","le poivron","m","bell pepper"],["🍄","le champignon","m","mushroom"],
   ["🫚","le gingembre","m","ginger"],["🫛","le petit pois","m","pea"],
+  ["🍄‍🟫","le champignon marron","m","brown mushroom"],["🫜","le légume-racine","m","root vegetable"],
 
   // Nourriture
   ["🍞","le pain","m","bread"],["🥐","le croissant","m","croissant"],["🥖","la baguette","f","baguette"],["🧀","le fromage","m","cheese"],
@@ -86,6 +104,9 @@ const emojis = [
   ["🥮","le gâteau de lune","m","moon cake"],
   ["🥂","le champagne","m","champagne"],["🍾","la bouteille","f","bottle"],["🍹","le cocktail","m","cocktail"],["🍻","la chope","f","beer mug"],["🥃","le whisky","m","whisky"],["🍛","le curry","m","curry"],["🍤","la crevette frite","f","fried shrimp"],
   ["🍯","le miel","m","honey"],["🍠","la patate douce","f","sweet potato"],["🥫","la conserve","f","canned food"],["🫙","le bocal","m","jar"],["🥢","les baguettes","f","chopsticks"],["🍸","le martini","m","martini"],["🧋","le thé aux perles","m","bubble tea"],
+  ["🫓","la galette","f","flatbread"],["🥪","le sandwich","m","sandwich"],["🍲","la marmite","f","pot of food"],["🍢","la brochette","f","oden"],
+  ["🍥","la croquette de poisson","f","fish cake"],["🍡","le dango","m","dango"],["🥠","le biscuit chinois","m","fortune cookie"],["🥡","la boîte à emporter","f","takeout box"],
+  ["🍧","le granité","m","shaved ice"],["🍨","la coupe de glace","f","ice cream sundae"],["🫗","le liquide qui coule","m","pouring liquid"],["🧉","le maté","m","mate"],
 
   // Animaux
   ["🐶","le chien","m","dog"],["🐱","le chat","m","cat"],["🐭","la souris","f","mouse"],["🐹","le hamster","m","hamster"],
@@ -110,6 +131,15 @@ const emojis = [
   ["🐜","la fourmi","f","ant"],["🪰","la mouche","f","fly"],["🪲","le scarabée","m","beetle"],["🪳","le cafard","m","cockroach"],["🪱","le ver","m","worm"],
   ["🐚","le coquillage","m","seashell"],["🪸","le corail","m","coral"],["🦪","l'huître","f","oyster"],
   ["🕊️","la colombe","f","dove"],["🦙","le lama","m","llama"],["🦨","la mouffette","f","skunk"],["🦡","le blaireau","m","badger"],["🦝","le raton laveur","m","raccoon"],["🐀","le rat","m","rat"],["🦮","le chien guide","m","guide dog"],["🐈","le chat domestique","m","domestic cat"],
+  ["🐒","le petit singe","m","monkey"],["🐕","le chien domestique","m","dog"],["🐕‍🦺","le chien d'assistance","m","service dog"],["🐩","le caniche","m","poodle"],
+  ["🐈‍⬛","le chat noir","m","black cat"],["🐅","le tigre du Bengale","m","tiger"],["🐆","le léopard","m","leopard"],["🫎","l'élan","m","moose"],
+  ["🫏","l'âne","m","donkey"],["🐎","le cheval au galop","m","galloping horse"],["🐂","le bœuf","m","ox"],["🐃","le buffle","m","water buffalo"],
+  ["🐖","le porc","m","pig"],["🐗","le sanglier","m","boar"],["🐽","le groin","m","pig nose"],["🐏","le bélier à cornes","m","ram"],
+  ["🦣","le mammouth","m","mammoth"],["🐁","la souris grise","f","mouse"],["🐇","le lapin de garenne","m","rabbit"],["🐻‍❄️","l'ours polaire","m","polar bear"],
+  ["🐣","le poussin qui éclôt","m","hatching chick"],["🐤","le poussin","m","baby chick"],["🐥","le poussin de face","m","front-facing baby chick"],["🪽","l'aile","f","wing"],
+  ["🐦‍⬛","l'oiseau noir","m","black bird"],["🪿","l'oie","f","goose"],["🐦‍🔥","le phénix","m","phoenix"],["🐲","la tête de dragon","f","dragon face"],
+  ["🐉","le dragon","m","dragon"],["🦕","le dinosaure","m","dinosaur"],["🦖","le tyrannosaure","m","T-Rex"],["🐋","la baleine bleue","f","blue whale"],
+  ["🫍","l'orque","f","orca"],["🪼","la méduse","f","jellyfish"],["🕸️","la toile d'araignée","f","spider web"],["🦠","le microbe","m","microbe"],
 
   // Nature et météo
   ["🌸","la fleur de cerisier","f","cherry blossom"],["🌹","la rose","f","rose"],["🌻","le tournesol","m","sunflower"],["🌷","la tulipe","f","tulip"],
@@ -128,6 +158,12 @@ const emojis = [
   ["🪷","le lotus","m","lotus"],["🍃","la feuille au vent","f","leaf in wind"],["🌿","la fougère","f","fern"],["🐾","les empreintes de pattes","f","paw prints"],
   ["🌠","l'étoile filante","f","shooting star"],["🌅","le lever du soleil","m","sunrise"],["🌇","le coucher du soleil","m","sunset"],["☄️","la comète","f","comet"],["🌀","le cyclone","m","cyclone"],["🌡️","le thermomètre","m","thermometer"],
   ["🌴","le palmier","m","palm tree"],["🎋","le bambou","m","bamboo"],["🪺","le nid","m","nest"],["🪵","la bûche","f","log"],["🏜️","le désert","m","desert"],["🏝️","l'île","f","island"],
+  ["💐","le bouquet de fleurs","m","bouquet"],["💮","la fleur blanche","f","white flower"],["🏵️","la rosette","f","rosette"],["☘️","le trèfle à trois feuilles","m","shamrock"],
+  ["🪹","le nid vide","m","empty nest"],["🪾","l'arbre sans feuilles","m","leafless tree"],["⛰️","le sommet","m","mountain peak"],["🛘","l'éboulement","m","landslide"],
+  ["🗻","le mont Fuji","m","Mount Fuji"],["🌞","le soleil souriant","m","sun with face"],["🪐","la planète à anneaux","f","ringed planet"],["🌟","l'étoile brillante","f","glowing star"],
+  ["🌌","la Voie lactée","f","Milky Way"],["☁️","le nuage","m","cloud"],["🌥️","le ciel nuageux","m","cloudy sky"],["🌦️","l'averse","f","rain shower"],
+  ["🌨️","le nuage de neige","m","snow cloud"],["🌩️","le nuage d'orage","m","thundercloud"],["🌬️","le souffle du vent","m","wind face"],["🌂","le parapluie fermé","m","closed umbrella"],
+  ["☔","le parapluie sous la pluie","m","umbrella with rain drops"],["⛱️","le parasol","m","beach umbrella"],["☃️","le bonhomme de neige sous la neige","m","snowman in snow"],["⛄","le bonhomme de neige","m","snowman"],
 
   // Transport
   ["🚗","la voiture","f","car"],["🚕","le taxi","m","taxi"],["🚌","le bus","m","bus"],["🚑","l'ambulance","f","ambulance"],
@@ -136,6 +172,18 @@ const emojis = [
   ["🛶","le canoë","m","canoe"],["⛵","le voilier","m","sailboat"],
   ["🚇","le métro","m","subway"],["🚜","le tracteur","m","tractor"],["🏍️","la moto","f","motorcycle"],["🛴","la trottinette","f","scooter"],
   ["🚐","le minibus","m","minibus"],["🚓","la voiture de police","f","police car"],["🚢","le navire","m","ship"],["⛴️","le ferry","m","ferry"],["🛫","le décollage","m","takeoff"],["🛬","l'atterrissage","m","landing"],
+  ["🚃","le wagon","m","railway car"],["🚄","le TGV","m","high-speed train"],["🚅","le shinkansen","m","bullet train"],["🚆","le train de voyageurs","m","passenger train"],
+  ["🚈","le métro léger","m","light rail"],["🚉","la gare","f","station"],["🚊","le tramway","m","tram"],["🚝","le monorail","m","monorail"],
+  ["🚞","le train de montagne","m","mountain railway"],["🚋","le wagon de tramway","m","tram car"],["🚍","le bus de face","m","oncoming bus"],["🚎","le trolleybus","m","trolleybus"],
+  ["🚔","la voiture de police de face","f","oncoming police car"],["🚖","le taxi de face","m","oncoming taxi"],["🚘","la voiture de face","f","oncoming car"],["🚙","le SUV","m","SUV"],
+  ["🛻","le pick-up","m","pickup truck"],["🚚","le camion de livraison","m","delivery truck"],["🚛","le semi-remorque","m","articulated lorry"],["🏎️","la voiture de course","f","racing car"],
+  ["🦽","le fauteuil roulant","m","wheelchair"],["🦼","le fauteuil roulant électrique","m","electric wheelchair"],["🛺","le tuk-tuk","m","auto rickshaw"],["🛼","le patin à roulettes","m","roller skate"],
+  ["🚏","l'arrêt de bus","m","bus stop"],["🛣️","l'autoroute","f","motorway"],["🛤️","la voie ferrée","f","railway track"],["🛢️","le baril de pétrole","m","oil drum"],
+  ["🛞","la roue","f","wheel"],["🚨","le gyrophare","m","police car light"],["🚥","le feu tricolore horizontal","m","horizontal traffic light"],["🚦","le feu tricolore","m","traffic light"],
+  ["🛑","le panneau stop","m","stop sign"],["🚧","les travaux","m","roadworks"],["⚓","l'ancre","f","anchor"],["🛟","la bouée de sauvetage","f","ring buoy"],
+  ["🚤","le hors-bord","m","speedboat"],["🛥️","le bateau à moteur","m","motor boat"],["🛩️","le petit avion","m","small airplane"],["🪂","le parachute","m","parachute"],
+  ["💺","le siège","m","seat"],["🚟","le train suspendu","m","suspension railway"],["🚠","le téléphérique","m","cable car"],["🚡","la télécabine","f","aerial tramway"],
+  ["🛰️","le satellite","m","satellite"],["🛸","la soucoupe volante","f","flying saucer"],
 
   // Corps et personnes
   ["👶","le bébé","m","baby"],["👦","le garçon","m","boy"],["👧","la fille","f","girl"],["👨","l'homme","m","man"],
@@ -146,6 +194,37 @@ const emojis = [
   ["👆","le doigt","m","finger"],
   ["🫁","le poumon","m","lung"],["🫀","le cœur anatomique","m","anatomical heart"],["💅","l'ongle","m","nail"],["🦴","l'os","m","bone"],
   ["🦵","le genou","m","knee"],["🤷","le haussement d'épaules","m","shrug"],["🤦","la consternation","f","facepalm"],["💃","la danseuse","f","dancer"],["🕺","le danseur","m","dancer"],
+  ["🦾","le bras mécanique","m","mechanical arm"],["🦿","la jambe mécanique","f","mechanical leg"],["🦻","l'appareil auditif","m","hearing aid"],["🫦","la lèvre mordue","f","biting lip"],
+  ["🧒","l'enfant","m","child"],["🧑","la personne","f","person"],["👱","les cheveux blonds","m","blond hair"],["🧔","la barbe","f","beard"],
+  ["🧔‍♂️","l'homme barbu","m","bearded man"],["🧔‍♀️","la femme barbue","f","bearded woman"],["👨‍🦰","l'homme roux","m","red-haired man"],["👨‍🦱","l'homme aux cheveux bouclés","m","curly-haired man"],
+  ["👨‍🦳","l'homme aux cheveux blancs","m","white-haired man"],["👨‍🦲","l'homme chauve","m","bald man"],["👩‍🦰","la femme rousse","f","red-haired woman"],["🧑‍🦰","les cheveux roux","m","red hair"],
+  ["👩‍🦱","la femme aux cheveux bouclés","f","curly-haired woman"],["🧑‍🦱","les cheveux bouclés","m","curly hair"],["👩‍🦳","la femme aux cheveux blancs","f","white-haired woman"],["🧑‍🦳","les cheveux blancs","m","white hair"],
+  ["👩‍🦲","la femme chauve","f","bald woman"],["🧑‍🦲","la calvitie","f","baldness"],["👱‍♀️","la femme blonde","f","blond woman"],["👱‍♂️","l'homme blond","m","blond man"],
+  ["🧓","la personne âgée","f","older person"],["🙍","le froncement de sourcils","m","frown"],["🙍‍♂️","l'homme mécontent","m","frowning man"],["🙍‍♀️","la femme mécontente","f","frowning woman"],
+  ["🙎","la bouderie","f","pouting"],["🙎‍♂️","le boudeur","m","sulky man"],["🙎‍♀️","la boudeuse","f","sulky woman"],["🙅","le geste de refus","m","gesture of refusal"],
+  ["🙅‍♂️","l'homme qui fait non","m","man gesturing no"],["🙅‍♀️","la femme qui fait non","f","woman gesturing no"],["🙆","le geste d'accord","m","gesture of agreement"],["🙆‍♂️","l'homme qui fait oui","m","man gesturing OK"],
+  ["🙆‍♀️","la femme qui fait oui","f","woman gesturing OK"],["💁","l'accueil","m","reception"],["💁‍♂️","l'hôte d'accueil","m","receptionist"],["💁‍♀️","l'hôtesse d'accueil","f","receptionist"],
+  ["🙋","la personne qui lève la main","f","person raising hand"],["🙋‍♂️","l'homme qui lève la main","m","man raising hand"],["🙋‍♀️","la femme qui lève la main","f","woman raising hand"],["🧏","la personne sourde","f","deaf person"],
+  ["🧏‍♂️","le sourd","m","deaf man"],["🧏‍♀️","la sourde","f","deaf woman"],["🙇","la révérence","f","bow"],["🙇‍♂️","l'homme qui s'incline","m","man bowing"],
+  ["🙇‍♀️","la femme qui s'incline","f","woman bowing"],["🤦‍♂️","l'homme consterné","m","man facepalming"],["🤦‍♀️","la femme consternée","f","woman facepalming"],["🤷‍♂️","l'homme qui hausse les épaules","m","man shrugging"],
+  ["🤷‍♀️","la femme qui hausse les épaules","f","woman shrugging"],["💆","le massage","m","massage"],["💆‍♂️","l'homme qui se fait masser","m","man getting massage"],["💆‍♀️","la femme qui se fait masser","f","woman getting massage"],
+  ["💇","la coupe de cheveux","f","haircut"],["💇‍♂️","l'homme chez le coiffeur","m","man getting haircut"],["💇‍♀️","la femme chez le coiffeur","f","woman getting haircut"],["🚶","la marche","f","walking"],
+  ["🚶‍♂️","le piéton","m","pedestrian"],["🚶‍♀️","la piétonne","f","pedestrian"],["🚶‍➡️","la marche vers la droite","f","walking right"],["🚶‍♀️‍➡️","la piétonne vers la droite","f","pedestrian facing right"],
+  ["🚶‍♂️‍➡️","le piéton vers la droite","m","pedestrian facing right"],["🧍","la station debout","f","standing"],["🧍‍♂️","l'homme debout","m","man standing"],["🧍‍♀️","la femme debout","f","woman standing"],
+  ["🧎","la position à genoux","f","kneeling"],["🧎‍♂️","l'homme à genoux","m","man kneeling"],["🧎‍♀️","la femme à genoux","f","woman kneeling"],["🧎‍➡️","la position à genoux vers la droite","f","kneeling facing right"],
+  ["🧎‍♀️‍➡️","la femme à genoux vers la droite","f","woman kneeling facing right"],["🧎‍♂️‍➡️","l'homme à genoux vers la droite","m","man kneeling facing right"],["🧑‍🦯","la personne avec une canne blanche","f","person with white cane"],["🧑‍🦯‍➡️","la personne avec une canne blanche vers la droite","f","person with white cane facing right"],
+  ["👨‍🦯","l'homme aveugle","m","blind man"],["👨‍🦯‍➡️","l'homme aveugle vers la droite","m","blind man facing right"],["👩‍🦯","la femme aveugle","f","blind woman"],["👩‍🦯‍➡️","la femme aveugle vers la droite","f","blind woman facing right"],
+  ["🧑‍🦼","le fauteuil électrique","m","motorized wheelchair"],["🧑‍🦼‍➡️","le fauteuil électrique vers la droite","m","motorized wheelchair facing right"],["👨‍🦼","l'homme en fauteuil électrique","m","man in motorized wheelchair"],["👨‍🦼‍➡️","l'homme en fauteuil électrique vers la droite","m","man in motorized wheelchair facing right"],
+  ["👩‍🦼","la femme en fauteuil électrique","f","woman in motorized wheelchair"],["👩‍🦼‍➡️","la femme en fauteuil électrique vers la droite","f","woman in motorized wheelchair facing right"],["🧑‍🦽","la personne en fauteuil roulant","f","person in wheelchair"],["🧑‍🦽‍➡️","la personne en fauteuil roulant vers la droite","f","person in wheelchair facing right"],
+  ["👨‍🦽","l'homme en fauteuil roulant","m","man in wheelchair"],["👨‍🦽‍➡️","l'homme en fauteuil roulant vers la droite","m","man in wheelchair facing right"],["👩‍🦽","la femme en fauteuil roulant","f","woman in wheelchair"],["👩‍🦽‍➡️","la femme en fauteuil roulant vers la droite","f","woman in wheelchair facing right"],
+  ["🏃","la course","f","running"],["🏃‍♂️","le coureur","m","runner"],["🏃‍♀️","la coureuse","f","runner"],["🏃‍➡️","la course vers la droite","f","running right"],
+  ["🏃‍♀️‍➡️","la coureuse vers la droite","f","runner facing right"],["🏃‍♂️‍➡️","le coureur vers la droite","m","runner facing right"],["🧑‍🩰","le ballet","m","ballet"],["🕴️","l'homme en lévitation","m","levitating man"],
+  ["👯","les oreilles de lapin","f","bunny ears"],["👯‍♂️","les hommes aux oreilles de lapin","m","men with bunny ears"],["👯‍♀️","les femmes aux oreilles de lapin","f","women with bunny ears"],["🧖","le hammam","m","steam room"],
+  ["🧖‍♂️","l'homme au hammam","m","man in steam room"],["🧖‍♀️","la femme au hammam","f","woman in steam room"],["🧗‍♂️","le grimpeur","m","climber"],["🧗‍♀️","la grimpeuse","f","climber"],
+  ["🧘","le yoga","m","yoga"],["🧘‍♂️","l'homme en position du lotus","m","man in lotus position"],["🧘‍♀️","la femme en position du lotus","f","woman in lotus position"],["🛀","le bain","m","bath"],
+  ["🛌","la personne au lit","f","person in bed"],["🗣️","la tête qui parle","f","speaking head"],["👤","la silhouette","f","silhouette"],["👥","les silhouettes","f","silhouettes"],
+  ["🫂","le câlin","m","hug"],["🧑‍🧑‍🧒","les deux parents et l'enfant","m","two parents and a child"],["🧑‍🧑‍🧒‍🧒","les deux parents et les deux enfants","m","two parents and two children"],["🧑‍🧒","le parent et l'enfant","m","parent and child"],
+  ["🧑‍🧒‍🧒","le parent et les deux enfants","m","parent and two children"],["👣","les traces de pas","f","footprints"],["🫆","l'empreinte digitale","f","fingerprint"],
 
   // Gestes de la main
   ["👍","le pouce en l'air","m","thumbs up"],["👎","le pouce en bas","m","thumbs down"],["✌️","le signe de victoire","m","peace sign"],["🤞","les doigts croisés","m","crossed fingers"],
@@ -156,6 +235,9 @@ const emojis = [
   ["✊","le poing levé","m","raised fist"],["👊","le coup de poing","m","fist bump"],["🤛","le poing gauche","m","left fist"],["🤜","le poing droit","m","right fist"],
   ["🤘","le signe rock","m","rock on"],["👇","le doigt vers le bas","m","pointing down"],["👈","le doigt vers la gauche","m","pointing left"],["👉","le doigt vers la droite","m","pointing right"],
   ["🫳","la paume vers le bas","f","palm down"],["🫴","la paume vers le haut","f","palm up"],
+  ["🫷","la main qui pousse vers la gauche","f","leftwards pushing hand"],["🫸","la main qui pousse vers la droite","f","rightwards pushing hand"],["🤌","les doigts joints","m","pinched fingers"],["🖕","le doigt d'honneur","m","middle finger"],
+  ["☝️","l'index levé","m","index pointing up"],["🫶","le cœur avec les mains","m","heart hands"],["👐","les mains ouvertes","f","open hands"],["🤲","les mains en coupe","f","cupped hands"],
+  ["✍️","la main qui écrit","f","writing hand"],["🤳","le selfie","m","selfie"],
 
   // Professions
   ["👨‍⚕️","le médecin","m","doctor"],["👩‍⚕️","la médecin","f","doctor"],["👨‍🍳","le cuisinier","m","cook"],["👩‍🍳","la cuisinière","f","cook"],
@@ -163,9 +245,33 @@ const emojis = [
   ["👨‍💼","l'employé","m","employee"],["👩‍💼","l'employée","f","employee"],["👨‍🔧","le mécanicien","m","mechanic"],["👩‍🔧","la mécanicienne","f","mechanic"],
   ["👨‍🚒","le pompier","m","firefighter"],["👩‍🚒","la pompière","f","firefighter"],["👮","l'agent de police","m","police officer"],["💂","le garde","m","guard"],
   ["👷","l'ouvrier","m","worker"],["🧑‍🌾","l'agriculteur","m","farmer"],["🧑‍🎨","l'artiste","m","artist"],["🧑‍💻","le programmeur","m","programmer"],["🧑‍🚀","l'astronaute","m","astronaut"],["🧑‍⚖️","le juge","m","judge"],["🧑‍🔬","le scientifique","m","scientist"],
+  ["🧑‍⚕️","le soignant","m","health worker"],["🧑‍🎓","l'élève","m","pupil"],["🧑‍🏫","l'enseignant","m","teacher"],["👨‍⚖️","le magistrat","m","judge"],
+  ["👩‍⚖️","la juge","f","judge"],["👨‍🌾","le fermier","m","farmer"],["👩‍🌾","la fermière","f","farmer"],["🧑‍🍳","le chef","m","chef"],
+  ["🧑‍🔧","le garagiste","m","mechanic"],["🧑‍🏭","le soudeur","m","factory worker"],["👨‍🏭","l'ouvrier d'usine","m","factory worker"],["👩‍🏭","l'ouvrière d'usine","f","factory worker"],
+  ["🧑‍💼","l'employé de bureau","m","office worker"],["👨‍🔬","le chercheur","m","researcher"],["👩‍🔬","la chercheuse","f","researcher"],["👨‍💻","l'informaticien","m","computer scientist"],
+  ["👩‍💻","l'informaticienne","f","computer scientist"],["🧑‍🎤","la rock star","f","rock star"],["👨‍🎤","le chanteur","m","singer"],["👩‍🎤","la chanteuse","f","singer"],
+  ["👨‍🎨","le peintre","m","painter"],["👩‍🎨","la peintre","f","painter"],["🧑‍✈️","le commandant de bord","m","airline captain"],["👨‍✈️","le pilote","m","pilot"],
+  ["👩‍✈️","la pilote","f","pilot"],["👨‍🚀","le spationaute","m","astronaut"],["👩‍🚀","la spationaute","f","astronaut"],["🧑‍🚒","le sapeur-pompier","m","firefighter"],
+  ["👮‍♂️","le policier","m","policeman"],["👮‍♀️","la policière","f","policewoman"],["🕵️","l'enquêteur","m","investigator"],["🕵️‍♂️","le détective","m","detective"],
+  ["🕵️‍♀️","la détective","f","detective"],["💂‍♂️","le garde royal","m","royal guard"],["💂‍♀️","la garde royale","f","royal guard"],["🥷","le ninja","m","ninja"],
+  ["👷‍♂️","l'ouvrier du bâtiment","m","construction worker"],["👷‍♀️","l'ouvrière du bâtiment","f","construction worker"],["🫅","le monarque","m","monarch"],["🤴","le prince","m","prince"],
+  ["👸","la princesse","f","princess"],["👳","la personne en turban","f","person wearing turban"],["👳‍♂️","l'homme en turban","m","man wearing turban"],["👳‍♀️","la femme en turban","f","woman wearing turban"],
+  ["👲","l'homme à la casquette chinoise","m","man with skullcap"],["🧕","la femme au foulard","f","woman with headscarf"],["🤵","la personne en smoking","f","person in tuxedo"],["🤵‍♂️","l'homme en smoking","m","man in tuxedo"],
+  ["🤵‍♀️","la femme en smoking","f","woman in tuxedo"],["👰","la personne au voile","f","person with veil"],["👰‍♂️","l'homme au voile","m","man with veil"],["👰‍♀️","la mariée","f","bride"],
+  ["🫃","l'homme enceint","m","pregnant man"],["🫄","la personne enceinte","f","pregnant person"],["🤱","l'allaitement","m","breast-feeding"],["👩‍🍼","la femme qui donne le biberon","f","woman feeding baby"],
+  ["👨‍🍼","l'homme qui donne le biberon","m","man feeding baby"],["🧑‍🍼","la personne qui donne le biberon","f","person feeding baby"],
 
   // Famille
   ["👪","la famille","f","family"],["💑","le couple","m","couple"],["🤰","la femme enceinte","f","pregnant woman"],["🍼","le biberon","m","baby bottle"],
+  ["🧑‍🤝‍🧑","les deux personnes main dans la main","f","people holding hands"],["👭","les deux femmes main dans la main","f","women holding hands"],["👫","l'homme et la femme main dans la main","m","man and woman holding hands"],["👬","les deux hommes main dans la main","m","men holding hands"],
+  ["💏","le baiser","m","kiss"],["👩‍❤️‍💋‍👨","le baiser entre une femme et un homme","m","kiss: woman, man"],["👨‍❤️‍💋‍👨","le baiser entre deux hommes","m","kiss: man, man"],["👩‍❤️‍💋‍👩","le baiser entre deux femmes","m","kiss: woman, woman"],
+  ["👩‍❤️‍👨","le couple homme et femme","m","couple: woman, man"],["👨‍❤️‍👨","le couple de deux hommes","m","couple: man, man"],["👩‍❤️‍👩","le couple de deux femmes","m","couple: woman, woman"],["👨‍👩‍👦","la famille avec un papa, une maman et un garçon","f","family with dad, mom and boy"],
+  ["👨‍👩‍👧","la famille avec un papa, une maman et une fille","f","family with dad, mom and girl"],["👨‍👩‍👧‍👦","la famille avec un papa, une maman, une fille et un garçon","f","family with dad, mom, girl and boy"],["👨‍👩‍👦‍👦","la famille avec un papa, une maman et deux garçons","f","family with dad, mom and two boys"],["👨‍👩‍👧‍👧","la famille avec un papa, une maman et deux filles","f","family with dad, mom and two girls"],
+  ["👨‍👨‍👦","la famille avec deux papas et un garçon","f","family with two dads and boy"],["👨‍👨‍👧","la famille avec deux papas et une fille","f","family with two dads and girl"],["👨‍👨‍👧‍👦","la famille avec deux papas, une fille et un garçon","f","family with two dads, girl and boy"],["👨‍👨‍👦‍👦","la famille avec deux papas et deux garçons","f","family with two dads and two boys"],
+  ["👨‍👨‍👧‍👧","la famille avec deux papas et deux filles","f","family with two dads and two girls"],["👩‍👩‍👦","la famille avec deux mamans et un garçon","f","family with two moms and boy"],["👩‍👩‍👧","la famille avec deux mamans et une fille","f","family with two moms and girl"],["👩‍👩‍👧‍👦","la famille avec deux mamans, une fille et un garçon","f","family with two moms, girl and boy"],
+  ["👩‍👩‍👦‍👦","la famille avec deux mamans et deux garçons","f","family with two moms and two boys"],["👩‍👩‍👧‍👧","la famille avec deux mamans et deux filles","f","family with two moms and two girls"],["👨‍👦","la famille avec un papa et un garçon","f","family with dad and boy"],["👨‍👦‍👦","la famille avec un papa et deux garçons","f","family with dad and two boys"],
+  ["👨‍👧","la famille avec un papa et une fille","f","family with dad and girl"],["👨‍👧‍👦","la famille avec un papa, une fille et un garçon","f","family with dad, girl and boy"],["👨‍👧‍👧","la famille avec un papa et deux filles","f","family with dad and two girls"],["👩‍👦","la famille avec une maman et un garçon","f","family with mom and boy"],
+  ["👩‍👦‍👦","la famille avec une maman et deux garçons","f","family with mom and two boys"],["👩‍👧","la famille avec une maman et une fille","f","family with mom and girl"],["👩‍👧‍👦","la famille avec une maman, une fille et un garçon","f","family with mom, girl and boy"],["👩‍👧‍👧","la famille avec une maman et deux filles","f","family with mom and two girls"],
 
   // Objets du quotidien
   ["📱","le téléphone","m","phone"],["💻","l'ordinateur","m","computer"],["⌨️","le clavier","m","keyboard"],["🖥️","l'écran","m","screen"],
@@ -191,6 +297,34 @@ const emojis = [
   ["🖌️","le pinceau","m","paintbrush"],["🖍️","le crayon de couleur","m","crayon"],["📋","le presse-papiers","m","clipboard"],["📝","la note","f","note"],["🗒️","le bloc-notes","m","notepad"],["📓","le cahier","m","notebook"],
   ["🧺","le panier à linge","m","laundry basket"],["🪡","l'aiguille","f","needle"],["🪤","le piège à souris","m","mousetrap"],["🔌","la prise","f","plug"],
   ["🧻","le papier toilette","m","toilet paper"],["🚽","les toilettes","f","toilet"],["🛒","le caddie","m","shopping cart"],["📰","le journal","m","newspaper"],["🔬","le microscope","m","microscope"],["🔭","le télescope","m","telescope"],["🖼️","le cadre","m","frame"],["🪪","la carte d'identité","f","ID card"],
+  ["🥽","les lunettes de protection","f","goggles"],["🥼","la blouse blanche","f","lab coat"],["🦺","le gilet de sécurité","m","safety vest"],["👘","le kimono","m","kimono"],
+  ["🥻","le sari","m","sari"],["👙","le bikini","m","bikini"],["👚","le chemisier","m","blouse"],["👛","le porte-monnaie","m","purse"],
+  ["👝","la pochette","f","clutch bag"],["🛍️","les sacs de shopping","m","shopping bags"],["🩴","la tong","f","flip-flop"],["👞","la chaussure d'homme","f","man's shoe"],
+  ["🥿","la ballerine","f","flat shoe"],["🩰","les chaussons de danse","m","ballet shoes"],["🪮","le peigne afro","m","hair pick"],["🪖","le casque militaire","m","military helmet"],
+  ["⛑️","le casque de secouriste","m","rescue helmet"],["📿","le chapelet","m","prayer beads"],["💄","le rouge à lèvres","m","lipstick"],["📲","l'appel entrant","m","incoming call"],
+  ["☎️","le téléphone fixe","m","telephone"],["📞","le combiné","m","telephone receiver"],["📟","le bipeur","m","pager"],["📠","le fax","m","fax machine"],
+  ["🪫","la batterie faible","f","low battery"],["🖲️","la boule de commande","f","trackball"],["💽","le disque d'ordinateur","m","computer disk"],["💾","la disquette","f","floppy disk"],
+  ["💿","le CD","m","CD"],["📀","le DVD","m","DVD"],["🧮","le boulier","m","abacus"],["🎥","la caméra","f","movie camera"],
+  ["🎞️","la pellicule","f","film"],["📽️","le projecteur de cinéma","m","film projector"],["📹","le caméscope","m","video camera"],["📼","la cassette vidéo","f","videocassette"],
+  ["🔍","la loupe","f","magnifying glass"],["🔎","la loupe inclinée à droite","f","magnifying glass tilted right"],["🏮","le lampion rouge","m","red paper lantern"],["🪔","la lampe à huile","f","diya lamp"],
+  ["📔","le carnet décoré","m","decorated notebook"],["📕","le livre fermé","m","closed book"],["📗","le livre vert","m","green book"],["📘","le livre bleu","m","blue book"],
+  ["📙","le livre orange","m","orange book"],["📒","le livre de comptes","m","ledger"],["📃","la page enroulée","f","curled page"],["📜","le parchemin","m","scroll"],
+  ["📄","la page","f","page"],["🗞️","le journal roulé","m","rolled-up newspaper"],["📑","les signets","m","bookmark tabs"],["🔖","le marque-page","m","bookmark"],
+  ["🪙","la pièce de monnaie","f","coin"],["🪎","le coffre au trésor","m","treasure chest"],["💴","le billet en yens","m","yen banknote"],["💵","le billet en dollars","m","dollar banknote"],
+  ["💶","le billet en euros","m","euro banknote"],["💷","le billet en livres","m","pound banknote"],["💸","l'argent qui s'envole","m","money with wings"],["💳","la carte bancaire","f","credit card"],
+  ["🧾","le reçu","m","receipt"],["💹","la courbe du yen en hausse","f","chart increasing with yen"],["✉️","l'enveloppe","f","envelope"],["📧","l'e-mail","m","e-mail"],
+  ["📨","le courrier entrant","m","incoming envelope"],["📩","l'enveloppe avec une flèche","f","envelope with arrow"],["📤","la boîte d'envoi","f","outbox"],["📥","la boîte de réception","f","inbox"],
+  ["📫","la boîte aux lettres au drapeau levé","f","mailbox with raised flag"],["📪","la boîte aux lettres au drapeau baissé","f","mailbox with lowered flag"],["📭","la boîte aux lettres ouverte","f","open mailbox"],["📮","la boîte aux lettres publique","f","postbox"],
+  ["🗳️","l'urne électorale","f","ballot box"],["✒️","la plume de stylo","f","pen nib"],["🖋️","le stylo plume","m","fountain pen"],["💼","le porte-documents","m","briefcase"],
+  ["📆","l'éphéméride","f","tear-off calendar"],["🗓️","le calendrier à spirale","m","spiral calendar"],["📇","le carnet d'adresses","m","card index"],["📈","le graphique en hausse","m","chart increasing"],
+  ["📉","le graphique en baisse","m","chart decreasing"],["📊","le graphique à barres","m","bar chart"],["📍","l'épingle","f","pin"],["🖇️","les trombones attachés","m","linked paperclips"],
+  ["🗃️","la boîte à fiches","f","card file box"],["🔓","le cadenas ouvert","m","unlocked padlock"],["🔏","le cadenas avec stylo","m","locked with pen"],["🔐","le cadenas avec clé","m","locked with key"],
+  ["🗝️","la clé ancienne","f","old key"],["⛏️","la pioche","f","pickaxe"],["⚒️","le marteau et la pioche","m","hammer and pick"],["🛠️","le marteau et la clé","m","hammer and wrench"],
+  ["🗡️","le poignard","m","dagger"],["⚔️","les épées croisées","f","crossed swords"],["💣","la bombe","f","bomb"],["🪃","le boomerang","m","boomerang"],
+  ["🛡️","le bouclier","m","shield"],["🗜️","le serre-joint","m","clamp"],["⚖️","la balance à plateaux","f","balance scale"],["🦯","la canne blanche","f","white cane"],
+  ["⛓️‍💥","la chaîne brisée","f","broken chain"],["⛓️","les chaînes","f","chains"],["🪝","le crochet","m","hook"],["🪏","la pelle","f","shovel"],
+  ["⚗️","l'alambic","m","alembic"],["🧪","l'éprouvette","f","test tube"],["🧫","la boîte de Petri","f","petri dish"],["🧬","l'ADN","m","DNA"],
+  ["📡","l'antenne parabolique","f","satellite dish"],["🩸","la goutte de sang","f","drop of blood"],["🩼","la béquille","f","crutch"],["🩻","la radiographie","f","x-ray"],
 
   // Maison
   ["🏠","la maison","f","house"],["🚪","la porte","f","door"],["🪟","la fenêtre","f","window"],["🛏️","le lit","m","bed"],
@@ -199,6 +333,7 @@ const emojis = [
   ["🥄","la cuillère","f","spoon"],["🍴","la fourchette","f","fork"],["🔪","le couteau","m","knife"],["🥣","le bol","m","bowl"],
   ["🪜","l'échelle","f","ladder"],["🛗","l'ascenseur","m","elevator"],["🪣","le seau","m","bucket"],["🧽","l'éponge","f","sponge"],
   ["🪠","la ventouse","f","plunger"],
+  ["🏺","l'amphore","f","amphora"],["🛎️","la cloche de comptoir","f","bellhop bell"],["🪒","le rasoir","m","razor"],["🧷","l'épingle à nourrice","f","safety pin"],
 
   // Musique et loisirs
   ["🎵","la musique","f","music"],["🎸","la guitare","f","guitar"],["🎹","le piano","m","piano"],["🥁","le tambour","m","drum"],
@@ -214,6 +349,28 @@ const emojis = [
   ["🤿","la plongée","f","diving"],["🏇","l'équitation","f","horse racing"],
   ["🎷","le saxophone","m","saxophone"],["🪕","le banjo","m","banjo"],["🪗","l'accordéon","m","accordion"],
   ["🏹","le tir à l'arc","m","archery"],["🤺","l'escrime","f","fencing"],["🚣","l'aviron","m","rowing"],["🏂","le snowboard","m","snowboarding"],["🤽","le water-polo","m","water polo"],
+  ["🏌️","la partie de golf","f","round of golf"],["🏌️‍♂️","le golfeur","m","golfer"],["🏌️‍♀️","la golfeuse","f","golfer"],["🏄‍♂️","le surfeur","m","surfer"],
+  ["🏄‍♀️","la surfeuse","f","surfer"],["🚣‍♂️","le rameur","m","rower"],["🚣‍♀️","la rameuse","f","rower"],["🏊‍♂️","le nageur","m","swimmer"],
+  ["🏊‍♀️","la nageuse","f","swimmer"],["⛹️","le dribble","m","dribbling"],["⛹️‍♂️","le basketteur","m","basketball player"],["⛹️‍♀️","la basketteuse","f","basketball player"],
+  ["🏋️‍♂️","l'homme haltérophile","m","weightlifter"],["🏋️‍♀️","la femme haltérophile","f","weightlifter"],["🚴‍♂️","le cycliste","m","cyclist"],["🚴‍♀️","la cycliste","f","cyclist"],
+  ["🚵","le VTT","m","mountain biking"],["🚵‍♂️","le vététiste","m","mountain biker"],["🚵‍♀️","la vététiste","f","mountain biker"],["🤸‍♂️","le gymnaste","m","gymnast"],
+  ["🤸‍♀️","la gymnaste","f","gymnast"],["🤼‍♂️","les lutteurs","m","wrestlers"],["🤼‍♀️","les lutteuses","f","wrestlers"],["🤽‍♂️","le joueur de water-polo","m","water polo player"],
+  ["🤽‍♀️","la joueuse de water-polo","f","water polo player"],["🤾","le handball","m","handball"],["🤾‍♂️","le handballeur","m","handball player"],["🤾‍♀️","la handballeuse","f","handball player"],
+  ["🤹","la jonglerie","f","juggling"],["🤹‍♂️","le jongleur","m","juggler"],["🤹‍♀️","la jongleuse","f","juggler"],["🎖️","la médaille militaire","f","military medal"],
+  ["🏅","la médaille sportive","f","sports medal"],["🥇","la médaille d'or","f","gold medal"],["🥈","la médaille d'argent","f","silver medal"],["🥉","la médaille de bronze","f","bronze medal"],
+  ["⚾","le baseball","m","baseball"],["🥎","le softball","m","softball"],["🏐","le volley-ball","m","volleyball"],["🏉","le rugby","m","rugby"],
+  ["🥏","le frisbee","m","flying disc"],["🏏","le cricket","m","cricket"],["🥍","la crosse","f","lacrosse"],["🥋","la tenue d'arts martiaux","f","martial arts uniform"],
+  ["⛸️","le patin à glace","m","ice skate"],["🎣","la canne à pêche","f","fishing rod"],["🎽","le maillot de course","m","running shirt"],["🛷","la luge","f","sled"],
+  ["🥌","la pierre de curling","f","curling stone"],["🪀","le yoyo","m","yo-yo"],["🔫","le pistolet à eau","m","water pistol"],["🎱","la boule de billard","f","pool ball"],
+  ["🔮","la boule de cristal","f","crystal ball"],["🪄","la baguette magique","f","magic wand"],["🕹️","la manette de jeu","f","joystick"],["🎰","la machine à sous","f","slot machine"],
+  ["🪅","la piñata","f","piñata"],["🪩","la boule à facettes","f","mirror ball"],["🪆","les poupées russes","f","nesting dolls"],["♠️","la couleur pique","f","spades"],
+  ["♥️","la couleur cœur","f","hearts"],["♦️","la couleur carreau","f","diamonds"],["♣️","la couleur trèfle","f","clubs"],["♟️","le pion d'échecs","m","chess pawn"],
+  ["🃏","le joker","m","joker"],["🀄","le dragon rouge du mahjong","m","mahjong red dragon"],["🎴","le jeu des fleurs","m","flower playing cards"],["🧵","la bobine de fil","f","thread"],
+  ["🧶","la pelote de laine","f","yarn"],["🪢","le nœud","m","knot"],["🔇","le son coupé","m","muted speaker"],["🔈","le volume faible","m","low volume"],
+  ["🔉","le volume moyen","m","medium volume"],["🔊","le volume fort","m","high volume"],["📢","le haut-parleur","m","loudspeaker"],["📣","le mégaphone","m","megaphone"],
+  ["📯","le cor postal","m","postal horn"],["🔕","la sonnerie coupée","f","bell with slash"],["🎙️","le micro de studio","m","studio microphone"],["🎚️","le curseur de niveau","m","level slider"],
+  ["🎛️","les boutons de réglage","m","control knobs"],["🎧","le casque audio","m","headphones"],["🪊","le trombone à coulisse","m","trombone"],["🪘","le djembé","m","long drum"],
+  ["🪇","les maracas","f","maracas"],["🪈","la flûte","f","flute"],["🪉","la harpe","f","harp"],
 
   // Lieux
   ["🏫","l'école","f","school"],["🏥","l'hôpital","m","hospital"],["🏪","le magasin","m","store"],["🏛️","le musée","m","museum"],
@@ -224,6 +381,12 @@ const emojis = [
   ["🏬","le centre commercial","m","shopping mall"],["🏭","l'usine","f","factory"],["🏦","la banque","f","bank"],["🏨","l'hôtel","m","hotel"],
   ["🏧","le distributeur","m","ATM"],["⛺","la tente","f","tent"],["🏤","le bureau de poste","m","post office"],["🏚️","la maison abandonnée","f","abandoned house"],
   ["⛽","la station-service","f","gas station"],["🛕","le temple","m","temple"],["🕌","la mosquée","f","mosque"],["🕍","la synagogue","f","synagogue"],["🏙️","la ville","f","city"],["🏞️","le parc national","m","national park"],
+  ["🌎","les Amériques","f","globe showing Americas"],["🌏","l'Asie et l'Australie","f","globe showing Asia-Australia"],["🌐","le globe avec méridiens","m","globe with meridians"],["🗾","la carte du Japon","f","map of Japan"],
+  ["🧱","la brique","f","brick"],["🛖","la hutte","f","hut"],["🏡","la maison avec jardin","f","house with garden"],["🏣","le bureau de poste japonais","m","Japanese post office"],
+  ["🏩","le love hotel","m","love hotel"],["🏯","le château japonais","m","Japanese castle"],["💒","le mariage","m","wedding"],["⛩️","le sanctuaire shinto","m","shinto shrine"],
+  ["🕋","la Kaaba","f","Kaaba"],["🌁","la brume","f","mist"],["🌃","la nuit étoilée","f","starry night"],["🌄","le lever du soleil sur les montagnes","m","sunrise over mountains"],
+  ["🌆","la ville au crépuscule","f","city at dusk"],["🌉","le pont de nuit","m","bridge at night"],["♨️","les sources chaudes","f","hot springs"],["🛝","le toboggan","m","slide"],
+  ["💈","l'enseigne de barbier","f","barber pole"],
 
   // Émotions et expressions
   ["😀","content","","happy"],["😃","joyeux","","joyful"],["😄","ravi","","delighted"],["😁","souriant","","grinning"],
@@ -255,6 +418,14 @@ const emojis = [
   ["😈","diabolique","","impish"],["😳","gêné","","flushed"],["🥱","ennuyé","","yawning"],
   ["🥳","fêtard","","party"],["🫠","fondant","","melting"],["😶‍🌫️","dans le brouillard","","in fog"],
   ["😇","sage","","angelic"],["😉","clin d'œil","","winking"],
+  ["☺️","tout sourire","","all smiles"],["🥲","ému aux larmes","","smiling with a tear"],["🤑","cupide","","money-mouth"],["🫨","tremblant","","shaking"],
+  ["🙂‍↔️","qui dit non","","head shaking no"],["🙂‍↕️","qui dit oui","","nodding"],["🫩","cerné","","bags under eyes"],["😷","masqué","","wearing a mask"],
+  ["🤒","fiévreux","","feverish"],["🤕","blessé","","injured"],["🫪","déformé","","distorted"],["🥺","suppliant","","pleading"],
+  ["😦","choqué","","shocked"],["😧","angoissé","","anguished"],["😖","déconcerté","","confounded"],["😣","persévérant","","persevering"],
+  ["😞","déçu","","disappointed"],["😓","en sueur","","cold sweat"],["😩","épuisé","","weary"],["😫","fatigué","","tired"],
+  ["💋","la trace de rouge à lèvres","f","kiss mark"],["💯","les cent points","m","hundred points"],["💢","le symbole de colère","m","anger symbol"],["🫯","la bagarre","f","fight"],
+  ["💥","l'explosion","f","explosion"],["💫","l'étourdissement","m","dizziness"],["💦","les gouttes de sueur","f","sweat droplets"],["🕳️","le trou","m","hole"],
+  ["👁️‍🗨️","l'œil dans une bulle","m","eye in speech bubble"],["🗨️","la bulle de dialogue","f","left speech bubble"],["🗯️","la bulle de colère","f","anger bubble"],
 
   // Divers
   ["🕐","l'heure","f","time"],["📅","le calendrier","m","calendar"],["🎁","le cadeau","m","gift"],["🎈","le ballon","m","balloon"],
@@ -268,6 +439,11 @@ const emojis = [
   ["🎉","la fête","f","party"],["🎊","les confettis","m","confetti"],["🎆","le feu d'artifice","m","fireworks"],["🎇","le cierge magique","m","sparkler"],
   ["🎄","le sapin de Noël","m","Christmas tree"],["🕯️","la bougie","f","candle"],["🎫","le billet","m","ticket"],["📸","la photo","f","photo"],
   ["🎶","les notes de musique","f","musical notes"],["🎼","la partition","f","musical score"],["🧊","le glaçon","m","ice cube"],["🫧","la bulle","f","bubble"],["🪶","la plume","f","feather"],
+  ["🧨","le pétard","m","firecracker"],["✨","les étincelles","f","sparkles"],["🎍","le bambou décoratif","m","pine decoration"],["🎎","les poupées japonaises","f","Japanese dolls"],
+  ["🎏","le koinobori","m","carp streamer"],["🎐","le carillon à vent","m","wind chime"],["🎑","la cérémonie de la lune","f","moon viewing ceremony"],["🧧","l'enveloppe rouge","f","red envelope"],
+  ["🎗️","le ruban de sensibilisation","m","awareness ribbon"],["🎟️","le ticket d'entrée","m","admission ticket"],["🚬","la cigarette","f","cigarette"],["⚰️","le cercueil","m","coffin"],
+  ["🪦","la pierre tombale","f","headstone"],["⚱️","l'urne funéraire","f","funeral urn"],["🧿","le mauvais œil","m","nazar amulet"],["🪬","la main de Fatma","f","hamsa"],
+  ["🪧","la pancarte","f","placard"],
 
   // Créatures et visages
   ["👹","le démon","m","demon"],["👺","le gobelin","m","goblin"],["👻","le fantôme","m","ghost"],["👽","l'extraterrestre","m","alien"],
@@ -277,6 +453,15 @@ const emojis = [
   ["🧜","la sirène","f","mermaid"],["🧞","le génie","m","genie"],["🧝","l'elfe","m","elf"],["👼","l'ange","m","angel"],
   ["🎅","le père Noël","m","Santa Claus"],
   ["🤶","la mère Noël","f","Mrs. Claus"],["🧌","le troll","m","troll"],["🧑‍🎄","le lutin","m","elf"],
+  ["😺","le chat qui sourit","m","grinning cat"],["😸","le chat rieur","m","grinning cat with smiling eyes"],["😹","le chat qui pleure de joie","m","cat with tears of joy"],["😻","le chat amoureux","m","cat in love"],
+  ["😼","le chat narquois","m","cat with wry smile"],["😽","le chat qui fait un bisou","m","kissing cat"],["🙀","le chat fatigué","m","weary cat"],["😿","le chat qui pleure","m","crying cat"],
+  ["😾","le chat qui boude","m","pouting cat"],["🙈","le singe qui ne voit rien","m","see-no-evil monkey"],["🙉","le singe qui n'entend rien","m","hear-no-evil monkey"],["🙊","le singe qui ne dit rien","m","speak-no-evil monkey"],
+  ["🦸","le héros","m","hero"],["🦸‍♂️","le super-héros","m","superhero"],["🦸‍♀️","la super-héroïne","f","superheroine"],["🦹","le méchant","m","villain"],
+  ["🦹‍♂️","le super-vilain","m","supervillain"],["🦹‍♀️","la super-vilaine","f","supervillain"],["🧙‍♂️","le magicien","m","wizard"],["🧙‍♀️","la sorcière","f","witch"],
+  ["🧚‍♂️","l'homme fée","m","man fairy"],["🧚‍♀️","la fée ailée","f","winged fairy"],["🧛‍♂️","l'homme vampire","m","man vampire"],["🧛‍♀️","la femme vampire","f","woman vampire"],
+  ["🧜‍♂️","le triton","m","merman"],["🧜‍♀️","l'ondine","f","water nymph"],["🧝‍♂️","l'homme elfe","m","man elf"],["🧝‍♀️","la femme elfe","f","woman elf"],
+  ["🧞‍♂️","le djinn","m","jinn"],["🧞‍♀️","la femme génie","f","woman genie"],["🧟‍♂️","l'homme zombie","m","man zombie"],["🧟‍♀️","la femme zombie","f","woman zombie"],
+  ["🫈","la créature poilue","f","hairy creature"],
 
   // Coeurs et symboles
   ["🧡","le cœur orange","m","orange heart"],["💛","le cœur jaune","m","yellow heart"],["💚","le cœur vert","m","green heart"],["💙","le cœur bleu","m","blue heart"],
@@ -291,6 +476,25 @@ const emojis = [
   ["⬛","le carré noir","m","black square"],["⬜","le carré blanc","m","white square"],
   ["🔶","le losange orange","m","orange diamond"],["🔷","le losange bleu","m","blue diamond"],["♾️","l'infini","m","infinity"],["☮️","la paix","f","peace"],
   ["☯️","le yin et yang","m","yin and yang"],["⚜️","la fleur de lys","f","fleur-de-lis"],["🔱","le trident","m","trident"],
+  ["💌","la lettre d'amour","f","love letter"],["💟","la décoration en cœur","f","heart decoration"],["❣️","le cœur en point d'exclamation","m","heart exclamation"],["🩷","le cœur rose","m","pink heart"],
+  ["🩵","le cœur bleu clair","m","light blue heart"],["🩶","le cœur gris","m","grey heart"],["🛐","le lieu de culte","m","place of worship"],["⚛️","le symbole de l'atome","m","atom symbol"],
+  ["🕉️","le om","m","om"],["✡️","l'étoile de David","f","star of David"],["☸️","la roue du dharma","f","wheel of dharma"],["✝️","la croix latine","f","latin cross"],
+  ["☦️","la croix orthodoxe","f","orthodox cross"],["☪️","l'étoile et le croissant","f","star and crescent"],["🕎","la menorah","f","menorah"],["🔯","l'étoile à six branches","f","six-pointed star"],
+  ["🪯","le khanda","m","khanda"],["⛎","le serpentaire","m","Ophiuchus"],["♀️","le symbole féminin","m","female sign"],["♂️","le symbole masculin","m","male sign"],
+  ["⚧️","le symbole transgenre","m","transgender symbol"],["✖️","le signe multiplier","m","multiplication sign"],["➕","le signe plus","m","plus sign"],["➖","le signe moins","m","minus sign"],
+  ["➗","le signe diviser","m","division sign"],["🟰","le signe égal","m","equals sign"],["‼️","le double point d'exclamation","m","double exclamation mark"],["⁉️","le point d'exclamation et d'interrogation","m","exclamation question mark"],
+  ["❔","le point d'interrogation blanc","m","white question mark"],["❕","le point d'exclamation blanc","m","white exclamation mark"],["〰️","la ligne ondulée","f","wavy dash"],["💱","le bureau de change","m","currency exchange"],
+  ["💲","le signe dollar","m","dollar sign"],["⚕️","le caducée","m","medical symbol"],["📛","le badge nominatif","m","name badge"],["🔰","le symbole japonais du débutant","m","Japanese beginner symbol"],
+  ["⭕","le cercle rouge creux","m","hollow red circle"],["☑️","la case cochée","f","checked box"],["✔️","la coche","f","check mark"],["❎","le bouton croix","m","cross mark button"],
+  ["➰","la boucle","f","curly loop"],["➿","la double boucle","f","double curly loop"],["〽️","la marque d'alternance","f","part alternation mark"],["✳️","l'astérisque","m","asterisk"],
+  ["✴️","l'étoile à huit branches","f","eight-pointed star"],["❇️","l'étincelle","f","sparkle"],["©️","le symbole copyright","m","copyright"],["®️","la marque déposée","f","registered"],
+  ["™️","la marque commerciale","f","trade mark"],["🫟","l'éclaboussure","f","splatter"],["🟠","le cercle orange","m","orange circle"],["🟣","le cercle violet","m","purple circle"],
+  ["🟤","le cercle marron","m","brown circle"],["⚫","le cercle noir","m","black circle"],["⚪","le cercle blanc","m","white circle"],["🟥","le carré rouge","m","red square"],
+  ["🟧","le carré orange","m","orange square"],["🟨","le carré jaune","m","yellow square"],["🟩","le carré vert","m","green square"],["🟦","le carré bleu","m","blue square"],
+  ["🟪","le carré violet","m","purple square"],["🟫","le carré marron","m","brown square"],["◼️","le carré noir moyen","m","black medium square"],["◻️","le carré blanc moyen","m","white medium square"],
+  ["◾","le carré noir moyen-petit","m","black medium-small square"],["◽","le carré blanc moyen-petit","m","white medium-small square"],["▪️","le petit carré noir","m","black small square"],["▫️","le petit carré blanc","m","white small square"],
+  ["🔸","le petit losange orange","m","small orange diamond"],["🔹","le petit losange bleu","m","small blue diamond"],["🔺","le triangle rouge vers le haut","m","red triangle pointed up"],["🔻","le triangle rouge vers le bas","m","red triangle pointed down"],
+  ["💠","le losange avec un point","m","diamond with a dot"],["🔘","le bouton radio","m","radio button"],["🔳","le bouton carré blanc","m","white square button"],["🔲","le bouton carré noir","m","black square button"],
 
   // Drapeaux
   ["🇫🇷","la France","f","France"],["🇺🇸","les États-Unis","m","United States"],["🇬🇧","le Royaume-Uni","m","United Kingdom"],["🇩🇪","l'Allemagne","f","Germany"],
@@ -300,90 +504,246 @@ const emojis = [
   ["🏴","le drapeau noir","m","black flag"],["🏁","le drapeau à damier","m","checkered flag"],["🚩","le drapeau rouge","m","red flag"],
   ["🇧🇪","la Belgique","f","Belgium"],["🇨🇭","la Suisse","f","Switzerland"],["🇲🇦","le Maroc","m","Morocco"],["🇸🇳","le Sénégal","m","Senegal"],["🇹🇳","la Tunisie","f","Tunisia"],
   ["🇨🇮","la Côte d'Ivoire","f","Ivory Coast"],["🇭🇹","Haïti","m","Haiti"],["🇨🇩","le Congo","m","Congo"],["🇱🇺","le Luxembourg","m","Luxembourg"],["🇲🇨","Monaco","m","Monaco"],
+  ["🎌","les drapeaux croisés","m","crossed flags"],["🏳️‍🌈","le drapeau arc-en-ciel","m","rainbow flag"],["🏳️‍⚧️","le drapeau transgenre","m","transgender flag"],["🏴‍☠️","le drapeau pirate","m","pirate flag"],
+  ["🇦🇨","l'île de l'Ascension","f","Ascension Island"],["🇦🇩","l'Andorre","f","Andorra"],["🇦🇪","les Émirats arabes unis","m","United Arab Emirates"],["🇦🇫","l'Afghanistan","m","Afghanistan"],
+  ["🇦🇬","Antigua-et-Barbuda","f","Antigua and Barbuda"],["🇦🇮","Anguilla","f","Anguilla"],["🇦🇱","l'Albanie","f","Albania"],["🇦🇲","l'Arménie","f","Armenia"],
+  ["🇦🇴","l'Angola","m","Angola"],["🇦🇶","l'Antarctique","m","Antarctica"],["🇦🇷","l'Argentine","f","Argentina"],["🇦🇸","les Samoa américaines","f","American Samoa"],
+  ["🇦🇹","l'Autriche","f","Austria"],["🇦🇼","Aruba","f","Aruba"],["🇦🇽","les îles Åland","f","Åland Islands"],["🇦🇿","l'Azerbaïdjan","m","Azerbaijan"],
+  ["🇧🇦","la Bosnie-Herzégovine","f","Bosnia and Herzegovina"],["🇧🇧","la Barbade","f","Barbados"],["🇧🇩","le Bangladesh","m","Bangladesh"],["🇧🇫","le Burkina Faso","m","Burkina Faso"],
+  ["🇧🇬","la Bulgarie","f","Bulgaria"],["🇧🇭","Bahreïn","m","Bahrain"],["🇧🇮","le Burundi","m","Burundi"],["🇧🇯","le Bénin","m","Benin"],
+  ["🇧🇱","Saint-Barthélemy","m","St. Barthélemy"],["🇧🇲","les Bermudes","f","Bermuda"],["🇧🇳","le Brunei","m","Brunei"],["🇧🇴","la Bolivie","f","Bolivia"],
+  ["🇧🇶","les Pays-Bas caribéens","m","Caribbean Netherlands"],["🇧🇸","les Bahamas","f","Bahamas"],["🇧🇹","le Bhoutan","m","Bhutan"],["🇧🇻","l'île Bouvet","f","Bouvet Island"],
+  ["🇧🇼","le Botswana","m","Botswana"],["🇧🇾","la Biélorussie","f","Belarus"],["🇧🇿","le Belize","m","Belize"],["🇨🇨","les îles Cocos","f","Cocos Islands"],
+  ["🇨🇫","la République centrafricaine","f","Central African Republic"],["🇨🇬","le Congo-Brazzaville","m","Congo-Brazzaville"],["🇨🇰","les îles Cook","f","Cook Islands"],["🇨🇱","le Chili","m","Chile"],
+  ["🇨🇲","le Cameroun","m","Cameroon"],["🇨🇴","la Colombie","f","Colombia"],["🇨🇵","l'île Clipperton","f","Clipperton Island"],["🇨🇶","l'île de Sercq","f","Sark"],
+  ["🇨🇷","le Costa Rica","m","Costa Rica"],["🇨🇺","Cuba","f","Cuba"],["🇨🇻","le Cap-Vert","m","Cape Verde"],["🇨🇼","Curaçao","f","Curaçao"],
+  ["🇨🇽","l'île Christmas","f","Christmas Island"],["🇨🇾","Chypre","f","Cyprus"],["🇨🇿","la Tchéquie","f","Czechia"],["🇩🇬","Diego Garcia","f","Diego Garcia"],
+  ["🇩🇯","Djibouti","m","Djibouti"],["🇩🇰","le Danemark","m","Denmark"],["🇩🇲","la Dominique","f","Dominica"],["🇩🇴","la République dominicaine","f","Dominican Republic"],
+  ["🇩🇿","l'Algérie","f","Algeria"],["🇪🇦","Ceuta et Melilla","f","Ceuta and Melilla"],["🇪🇨","l'Équateur","m","Ecuador"],["🇪🇪","l'Estonie","f","Estonia"],
+  ["🇪🇬","l'Égypte","f","Egypt"],["🇪🇭","le Sahara occidental","m","Western Sahara"],["🇪🇷","l'Érythrée","f","Eritrea"],["🇪🇹","l'Éthiopie","f","Ethiopia"],
+  ["🇪🇺","l'Union européenne","f","European Union"],["🇫🇮","la Finlande","f","Finland"],["🇫🇯","les Fidji","f","Fiji"],["🇫🇰","les îles Malouines","f","Falkland Islands"],
+  ["🇫🇲","la Micronésie","f","Micronesia"],["🇫🇴","les îles Féroé","f","Faroe Islands"],["🇬🇦","le Gabon","m","Gabon"],["🇬🇩","la Grenade","f","Grenada"],
+  ["🇬🇪","la Géorgie","f","Georgia"],["🇬🇫","la Guyane","f","French Guiana"],["🇬🇬","Guernesey","f","Guernsey"],["🇬🇭","le Ghana","m","Ghana"],
+  ["🇬🇮","Gibraltar","m","Gibraltar"],["🇬🇱","le Groenland","m","Greenland"],["🇬🇲","la Gambie","f","Gambia"],["🇬🇳","la Guinée","f","Guinea"],
+  ["🇬🇵","la Guadeloupe","f","Guadeloupe"],["🇬🇶","la Guinée équatoriale","f","Equatorial Guinea"],["🇬🇷","la Grèce","f","Greece"],["🇬🇸","la Géorgie du Sud-et-les îles Sandwich du Sud","f","South Georgia and South Sandwich Islands"],
+  ["🇬🇹","le Guatemala","m","Guatemala"],["🇬🇺","l'île de Guam","f","Guam"],["🇬🇼","la Guinée-Bissau","f","Guinea-Bissau"],["🇬🇾","le Guyana","m","Guyana"],
+  ["🇭🇰","Hong Kong","m","Hong Kong"],["🇭🇲","les îles Heard-et-MacDonald","f","Heard and McDonald Islands"],["🇭🇳","le Honduras","m","Honduras"],["🇭🇷","la Croatie","f","Croatia"],
+  ["🇭🇺","la Hongrie","f","Hungary"],["🇮🇨","les îles Canaries","f","Canary Islands"],["🇮🇩","l'Indonésie","f","Indonesia"],["🇮🇪","l'Irlande","f","Ireland"],
+  ["🇮🇱","Israël","m","Israel"],["🇮🇲","l'île de Man","f","Isle of Man"],["🇮🇴","le Territoire britannique de l'océan Indien","m","British Indian Ocean Territory"],["🇮🇶","l'Irak","m","Iraq"],
+  ["🇮🇷","l'Iran","m","Iran"],["🇮🇸","l'Islande","f","Iceland"],["🇯🇪","Jersey","f","Jersey"],["🇯🇲","la Jamaïque","f","Jamaica"],
+  ["🇯🇴","la Jordanie","f","Jordan"],["🇰🇪","le Kenya","m","Kenya"],["🇰🇬","le Kirghizstan","m","Kyrgyzstan"],["🇰🇭","le Cambodge","m","Cambodia"],
+  ["🇰🇮","Kiribati","f","Kiribati"],["🇰🇲","les Comores","f","Comoros"],["🇰🇳","Saint-Christophe-et-Niévès","m","St. Kitts and Nevis"],["🇰🇵","la Corée du Nord","f","North Korea"],
+  ["🇰🇼","le Koweït","m","Kuwait"],["🇰🇾","les îles Caïmans","f","Cayman Islands"],["🇰🇿","le Kazakhstan","m","Kazakhstan"],["🇱🇦","le Laos","m","Laos"],
+  ["🇱🇧","le Liban","m","Lebanon"],["🇱🇨","Sainte-Lucie","f","St. Lucia"],["🇱🇮","le Liechtenstein","m","Liechtenstein"],["🇱🇰","le Sri Lanka","m","Sri Lanka"],
+  ["🇱🇷","le Liberia","m","Liberia"],["🇱🇸","le Lesotho","m","Lesotho"],["🇱🇹","la Lituanie","f","Lithuania"],["🇱🇻","la Lettonie","f","Latvia"],
+  ["🇱🇾","la Libye","f","Libya"],["🇲🇩","la Moldavie","f","Moldova"],["🇲🇪","le Monténégro","m","Montenegro"],["🇲🇫","Saint-Martin","m","St. Martin"],
+  ["🇲🇬","Madagascar","f","Madagascar"],["🇲🇭","les îles Marshall","f","Marshall Islands"],["🇲🇰","la Macédoine du Nord","f","North Macedonia"],["🇲🇱","le Mali","m","Mali"],
+  ["🇲🇲","la Birmanie","f","Myanmar"],["🇲🇳","la Mongolie","f","Mongolia"],["🇲🇴","Macao","m","Macao"],["🇲🇵","les îles Mariannes du Nord","f","Northern Mariana Islands"],
+  ["🇲🇶","la Martinique","f","Martinique"],["🇲🇷","la Mauritanie","f","Mauritania"],["🇲🇸","Montserrat","f","Montserrat"],["🇲🇹","Malte","f","Malta"],
+  ["🇲🇺","l'île Maurice","f","Mauritius"],["🇲🇻","les Maldives","f","Maldives"],["🇲🇼","le Malawi","m","Malawi"],["🇲🇾","la Malaisie","f","Malaysia"],
+  ["🇲🇿","le Mozambique","m","Mozambique"],["🇳🇦","la Namibie","f","Namibia"],["🇳🇨","la Nouvelle-Calédonie","f","New Caledonia"],["🇳🇪","le Niger","m","Niger"],
+  ["🇳🇫","l'île Norfolk","f","Norfolk Island"],["🇳🇬","le Nigeria","m","Nigeria"],["🇳🇮","le Nicaragua","m","Nicaragua"],["🇳🇱","les Pays-Bas","m","Netherlands"],
+  ["🇳🇴","la Norvège","f","Norway"],["🇳🇵","le Népal","m","Nepal"],["🇳🇷","Nauru","f","Nauru"],["🇳🇺","Niue","f","Niue"],
+  ["🇳🇿","la Nouvelle-Zélande","f","New Zealand"],["🇴🇲","Oman","m","Oman"],["🇵🇦","le Panama","m","Panama"],["🇵🇪","le Pérou","m","Peru"],
+  ["🇵🇫","la Polynésie française","f","French Polynesia"],["🇵🇬","la Papouasie-Nouvelle-Guinée","f","Papua New Guinea"],["🇵🇭","les Philippines","f","Philippines"],["🇵🇰","le Pakistan","m","Pakistan"],
+  ["🇵🇱","la Pologne","f","Poland"],["🇵🇲","Saint-Pierre-et-Miquelon","m","St. Pierre and Miquelon"],["🇵🇳","les îles Pitcairn","f","Pitcairn Islands"],["🇵🇷","Porto Rico","m","Puerto Rico"],
+  ["🇵🇸","la Palestine","f","Palestine"],["🇵🇹","le Portugal","m","Portugal"],["🇵🇼","les Palaos","f","Palau"],["🇵🇾","le Paraguay","m","Paraguay"],
+  ["🇶🇦","le Qatar","m","Qatar"],["🇷🇪","la Réunion","f","Réunion"],["🇷🇴","la Roumanie","f","Romania"],["🇷🇸","la Serbie","f","Serbia"],
+  ["🇷🇼","le Rwanda","m","Rwanda"],["🇸🇦","l'Arabie saoudite","f","Saudi Arabia"],["🇸🇧","les îles Salomon","f","Solomon Islands"],["🇸🇨","les Seychelles","f","Seychelles"],
+  ["🇸🇩","le Soudan","m","Sudan"],["🇸🇪","la Suède","f","Sweden"],["🇸🇬","Singapour","f","Singapore"],["🇸🇭","Sainte-Hélène","f","St. Helena"],
+  ["🇸🇮","la Slovénie","f","Slovenia"],["🇸🇯","le Svalbard et Jan Mayen","m","Svalbard and Jan Mayen"],["🇸🇰","la Slovaquie","f","Slovakia"],["🇸🇱","la Sierra Leone","f","Sierra Leone"],
+  ["🇸🇲","Saint-Marin","m","San Marino"],["🇸🇴","la Somalie","f","Somalia"],["🇸🇷","le Suriname","m","Suriname"],["🇸🇸","le Soudan du Sud","m","South Sudan"],
+  ["🇸🇹","Sao Tomé-et-Principe","m","São Tomé and Príncipe"],["🇸🇻","le Salvador","m","El Salvador"],["🇸🇽","Sint Maarten","m","Sint Maarten"],["🇸🇾","la Syrie","f","Syria"],
+  ["🇸🇿","l'Eswatini","m","Eswatini"],["🇹🇦","Tristan da Cunha","f","Tristan da Cunha"],["🇹🇨","les îles Turques-et-Caïques","f","Turks and Caicos Islands"],["🇹🇩","le Tchad","m","Chad"],
+  ["🇹🇫","les Terres australes françaises","f","French Southern Territories"],["🇹🇬","le Togo","m","Togo"],["🇹🇭","la Thaïlande","f","Thailand"],["🇹🇯","le Tadjikistan","m","Tajikistan"],
+  ["🇹🇰","les Tokelau","f","Tokelau"],["🇹🇱","le Timor oriental","m","Timor-Leste"],["🇹🇲","le Turkménistan","m","Turkmenistan"],["🇹🇴","les Tonga","f","Tonga"],
+  ["🇹🇷","la Turquie","f","Türkiye"],["🇹🇹","Trinité-et-Tobago","f","Trinidad and Tobago"],["🇹🇻","les Tuvalu","f","Tuvalu"],["🇹🇼","Taïwan","m","Taiwan"],
+  ["🇹🇿","la Tanzanie","f","Tanzania"],["🇺🇦","l'Ukraine","f","Ukraine"],["🇺🇬","l'Ouganda","m","Uganda"],["🇺🇲","les îles mineures éloignées des États-Unis","f","U.S. Outlying Islands"],
+  ["🇺🇳","les Nations unies","f","United Nations"],["🇺🇾","l'Uruguay","m","Uruguay"],["🇺🇿","l'Ouzbékistan","m","Uzbekistan"],["🇻🇦","le Vatican","m","Vatican City"],
+  ["🇻🇨","Saint-Vincent-et-les-Grenadines","m","St. Vincent and the Grenadines"],["🇻🇪","le Venezuela","m","Venezuela"],["🇻🇬","les îles Vierges britanniques","f","British Virgin Islands"],["🇻🇮","les îles Vierges des États-Unis","f","U.S. Virgin Islands"],
+  ["🇻🇳","le Viêt Nam","m","Vietnam"],["🇻🇺","le Vanuatu","m","Vanuatu"],["🇼🇫","Wallis-et-Futuna","m","Wallis and Futuna"],["🇼🇸","les Samoa","f","Samoa"],
+  ["🇽🇰","le Kosovo","m","Kosovo"],["🇾🇪","le Yémen","m","Yemen"],["🇾🇹","Mayotte","f","Mayotte"],["🇿🇦","l'Afrique du Sud","f","South Africa"],
+  ["🇿🇲","la Zambie","f","Zambia"],["🇿🇼","le Zimbabwe","m","Zimbabwe"],["🏴󠁧󠁢󠁥󠁮󠁧󠁿","l'Angleterre","f","England"],["🏴󠁧󠁢󠁳󠁣󠁴󠁿","l'Écosse","f","Scotland"],
+  ["🏴󠁧󠁢󠁷󠁬󠁳󠁿","le pays de Galles","m","Wales"],
 
   // Zodiaque
   ["♈","le bélier","m","Aries"],["♉","le taureau","m","Taurus"],["♊","les gémeaux","m","Gemini"],["♋","le cancer","m","Cancer"],
   ["♌","le lion","m","Leo"],["♍","la vierge","f","Virgo"],["♎","la balance","f","Libra"],["♏","le scorpion","m","Scorpio"],
   ["♐","le sagittaire","m","Sagittarius"],["♑","le capricorne","m","Capricorn"],["♒","le verseau","m","Aquarius"],["♓","les poissons","m","Pisces"],
+  // L'heure
+  ["🕛","douze heures","f","twelve o'clock"],["🕧","douze heures et demie","f","twelve-thirty"],["🕜","une heure et demie","f","one-thirty"],["🕑","deux heures","f","two o'clock"],
+  ["🕝","deux heures et demie","f","two-thirty"],["🕒","trois heures","f","three o'clock"],["🕞","trois heures et demie","f","three-thirty"],["🕓","quatre heures","f","four o'clock"],
+  ["🕟","quatre heures et demie","f","four-thirty"],["🕔","cinq heures","f","five o'clock"],["🕠","cinq heures et demie","f","five-thirty"],["🕕","six heures","f","six o'clock"],
+  ["🕡","six heures et demie","f","six-thirty"],["🕖","sept heures","f","seven o'clock"],["🕢","sept heures et demie","f","seven-thirty"],["🕗","huit heures","f","eight o'clock"],
+  ["🕣","huit heures et demie","f","eight-thirty"],["🕘","neuf heures","f","nine o'clock"],["🕤","neuf heures et demie","f","nine-thirty"],["🕙","dix heures","f","ten o'clock"],
+  ["🕥","dix heures et demie","f","ten-thirty"],["🕚","onze heures","f","eleven o'clock"],["🕦","onze heures et demie","f","eleven-thirty"],
+
+  // Panneaux et flèches
+  ["🚮","le panneau « jetez vos déchets à la poubelle »","m","litter in bin sign"],["🚰","l'eau potable","f","potable water"],["♿","le symbole handicapé","m","wheelchair symbol"],["🚹","les toilettes pour hommes","f","men's room"],
+  ["🚺","les toilettes pour femmes","f","women's room"],["🚻","le panneau des toilettes","m","restroom"],["🚼","le symbole bébé","m","baby symbol"],["🚾","les WC","m","water closet"],
+  ["🛂","le contrôle des passeports","m","passport control"],["🛃","la douane","f","customs"],["🛄","le retrait des bagages","m","baggage claim"],["🛅","la consigne à bagages","f","left luggage"],
+  ["🚸","le passage d'enfants","m","children crossing"],["🚳","l'interdiction des vélos","f","no bicycles"],["🚭","l'interdiction de fumer","f","no smoking"],["🚯","l'interdiction de jeter des déchets","f","no littering"],
+  ["🚱","l'eau non potable","f","non-potable water"],["🚷","l'interdiction aux piétons","f","no pedestrians"],["📵","l'interdiction des téléphones portables","f","no mobile phones"],["🔞","l'interdiction aux moins de dix-huit ans","f","no one under eighteen"],
+  ["☢️","le symbole radioactif","m","radioactive"],["☣️","le danger biologique","m","biohazard"],["⬆️","la flèche vers le haut","f","up arrow"],["↗️","la flèche en haut à droite","f","up-right arrow"],
+  ["➡️","la flèche vers la droite","f","right arrow"],["↘️","la flèche en bas à droite","f","down-right arrow"],["⬇️","la flèche vers le bas","f","down arrow"],["↙️","la flèche en bas à gauche","f","down-left arrow"],
+  ["⬅️","la flèche vers la gauche","f","left arrow"],["↖️","la flèche en haut à gauche","f","up-left arrow"],["↕️","la flèche haut et bas","f","up-down arrow"],["↔️","la flèche gauche et droite","f","left-right arrow"],
+  ["↩️","la flèche courbe vers la gauche","f","right arrow curving left"],["↪️","la flèche courbe vers la droite","f","left arrow curving right"],["⤴️","la flèche courbe vers le haut","f","right arrow curving up"],["⤵️","la flèche courbe vers le bas","f","right arrow curving down"],
+  ["🔃","les flèches dans le sens horaire","f","clockwise arrows"],["🔄","les flèches dans le sens antihoraire","f","counterclockwise arrows"],["🔙","la flèche « retour »","f","BACK arrow"],["🔚","la flèche « fin »","f","END arrow"],
+  ["🔛","la flèche « activé »","f","ON arrow"],["🔜","la flèche « bientôt »","f","SOON arrow"],["🔝","la flèche « en haut »","f","TOP arrow"],["🔀","le bouton lecture aléatoire","m","shuffle button"],
+  ["🔁","le bouton répéter","m","repeat button"],["🔂","le bouton répéter une fois","m","repeat single button"],["▶️","le bouton lecture","m","play button"],["⏩","le bouton avance rapide","m","fast-forward button"],
+  ["⏭️","le bouton piste suivante","m","next track button"],["⏯️","le bouton lecture pause","m","play or pause button"],["◀️","le bouton retour arrière","m","reverse button"],["⏪","le bouton retour rapide","m","fast reverse button"],
+  ["⏮️","le bouton piste précédente","m","previous track button"],["🔼","le petit triangle vers le haut","m","upwards button"],["⏫","la double flèche vers le haut","f","fast up button"],["🔽","le petit triangle vers le bas","m","downwards button"],
+  ["⏬","la double flèche vers le bas","f","fast down button"],["⏸️","le bouton pause","m","pause button"],["⏹️","le bouton stop","m","stop button"],["⏺️","le bouton enregistrer","m","record button"],
+  ["⏏️","le bouton éjecter","m","eject button"],["🎦","le symbole du cinéma","m","cinema symbol"],["🔅","la luminosité faible","f","dim button"],["🔆","la luminosité élevée","f","bright button"],
+  ["📶","les barres de réseau","f","signal bars"],["🛜","le sans-fil","m","wireless"],["📳","le mode vibreur","m","vibration mode"],["📴","le téléphone éteint","m","mobile phone off"],
+
+  // Lettres et chiffres
+  ["#️⃣","la touche dièse","f","keycap number sign"],["*️⃣","la touche étoile","f","keycap asterisk"],["0️⃣","la touche zéro","f","keycap 0"],["1️⃣","la touche un","f","keycap 1"],
+  ["2️⃣","la touche deux","f","keycap 2"],["3️⃣","la touche trois","f","keycap 3"],["4️⃣","la touche quatre","f","keycap 4"],["5️⃣","la touche cinq","f","keycap 5"],
+  ["6️⃣","la touche six","f","keycap 6"],["7️⃣","la touche sept","f","keycap 7"],["8️⃣","la touche huit","f","keycap 8"],["9️⃣","la touche neuf","f","keycap 9"],
+  ["🔟","la touche dix","f","keycap 10"],["🔠","les majuscules","f","uppercase letters"],["🔡","les minuscules","f","lowercase letters"],["🔢","la saisie de chiffres","f","input numbers"],
+  ["🔣","la saisie de symboles","f","input symbols"],["🔤","l'alphabet latin","m","Latin alphabet"],["🅰️","le groupe sanguin A","m","blood type A"],["🆎","le groupe sanguin AB","m","blood type AB"],
+  ["🅱️","le groupe sanguin B","m","blood type B"],["🆑","le bouton effacer","m","clear button"],["🆒","le bouton « cool »","m","COOL button"],["🆓","le bouton « gratuit »","m","FREE button"],
+  ["ℹ️","le symbole information","m","information"],["🆔","le bouton identifiant","m","ID button"],["Ⓜ️","le M encerclé","m","circled M"],["🆕","le bouton « nouveau »","m","NEW button"],
+  ["🆖","le bouton « pas bien »","m","NG button"],["🅾️","le groupe sanguin O","m","blood type O"],["🆗","le bouton OK","m","OK button"],["🅿️","le bouton parking","m","P button"],
+  ["🆘","le bouton SOS","m","SOS button"],["🆙","le bouton « vers le haut »","m","UP button"],["🆚","le bouton « contre »","m","VS button"],["🈁","le bouton « ici » en japonais","m","Japanese “here” button"],
+  ["🈂️","le bouton « frais de service » en japonais","m","Japanese “service charge” button"],["🈷️","le bouton « montant mensuel » en japonais","m","Japanese “monthly amount” button"],["🈶","le bouton « payant » en japonais","m","Japanese “not free of charge” button"],["🈯","le bouton « réservé » en japonais","m","Japanese “reserved” button"],
+  ["🉐","le bouton « bonne affaire » en japonais","m","Japanese “bargain” button"],["🈹","le bouton « réduction » en japonais","m","Japanese “discount” button"],["🈚","le bouton « gratuit » en japonais","m","Japanese “free of charge” button"],["🈲","le bouton « interdit » en japonais","m","Japanese “prohibited” button"],
+  ["🉑","le bouton « acceptable » en japonais","m","Japanese “acceptable” button"],["🈸","le bouton « demande » en japonais","m","Japanese “application” button"],["🈴","le bouton « réussite » en japonais","m","Japanese “passing grade” button"],["🈳","le bouton « libre » en japonais","m","Japanese “vacancy” button"],
+  ["㊗️","le bouton « félicitations » en japonais","m","Japanese “congratulations” button"],["㊙️","le bouton « secret » en japonais","m","Japanese “secret” button"],["🈺","le bouton « ouvert » en japonais","m","Japanese “open for business” button"],["🈵","le bouton « complet » en japonais","m","Japanese “no vacancy” button"],
 ];
 
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('search');
 const voiceOptions = document.getElementById('voice-options');
+const voiceNotice = document.getElementById('voice-notice');
 const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
 const randomBtn = document.getElementById('random-btn');
 let selectedVoice = null;
 let genderFilter = '';
 
+const hasSpeech = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+let frVoices = [];
+
+const voiceLang = v => v.lang.replace('_', '-').toLowerCase();
+const isFrFR = v => voiceLang(v) === 'fr-fr';
+
+// Short button label: "Microsoft Denise Online - French" → "Denise"
+const shortName = v => v.name.replace(/^(Microsoft|Apple|Google)\s+(?=\S)/i, '').split(/[\s(-]/)[0];
+
 function loadVoices() {
+  if (!hasSpeech) return;
   const voices = speechSynthesis.getVoices();
-  const frVoices = voices.filter(v => v.lang.startsWith('fr'));
-  const thomas = frVoices.find(v => v.name.includes('Thomas'));
-  const amelie = frVoices.find(v => v.name.includes('Amelie') || v.name.includes('Amélie'));
-
+  frVoices = voices.filter(v => voiceLang(v).startsWith('fr'));
+  frVoices = [...frVoices.filter(isFrFR), ...frVoices.filter(v => !isFrFR(v))];
   voiceOptions.innerHTML = '';
+  if (!frVoices.length) { selectedVoice = null; return; }
+  voiceNotice.hidden = true;
 
-  if (thomas && amelie) {
-    voiceOptions.className = 'voice-radios';
-    [[amelie, 'Amelie'], [thomas, 'Thomas']].forEach(([voice, name], i) => {
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="radio" name="voice" value="${i}" ${i === 0 ? 'checked' : ''}><span>${name}</span>`;
-      label.querySelector('input').addEventListener('change', () => { selectedVoice = voice; });
-      voiceOptions.appendChild(label);
+  // Amélie and Thomas when available, otherwise the best two other French voices
+  const amelie = frVoices.find(v => /am[eé]lie/i.test(v.name));
+  const thomas = frVoices.find(v => /thomas/i.test(v.name));
+  const pair = [amelie, thomas].filter(Boolean);
+  for (const v of frVoices) if (pair.length < 2 && !pair.includes(v)) pair.push(v);
+
+  const saved = store.get('fr-moji-voice');
+  selectedVoice = pair.find(v => v.name === saved) || pair[0];
+  if (pair.length < 2) return;
+
+  let names = pair.map(v => v === amelie ? 'Amélie' : v === thomas ? 'Thomas' : shortName(v));
+  if (names[0] === names[1]) names = ['Voix 1', 'Voix 2'];
+  voiceOptions.className = 'voice-radios';
+  pair.forEach((voice, i) => {
+    const label = document.createElement('label');
+    label.title = voice.name;
+    label.innerHTML = `<input type="radio" name="voice" value="${i}"><span></span>`;
+    label.querySelector('span').textContent = names[i];
+    const input = label.querySelector('input');
+    input.checked = voice === selectedVoice;
+    input.addEventListener('change', () => {
+      selectedVoice = voice;
+      store.set('fr-moji-voice', voice.name);
     });
-    selectedVoice = amelie;
-  } else {
-    selectedVoice = frVoices[0] || null;
-  }
+    voiceOptions.appendChild(label);
+  });
 }
 
-function speak(text) {
+function showVoiceNotice(msg) {
+  voiceNotice.textContent = msg;
+  voiceNotice.hidden = false;
+}
+
+function checkFrenchVoice() {
+  if (!frVoices.length) showVoiceNotice('Aucune voix française trouvée sur cet appareil. Pour entendre la prononciation, installe une voix française dans les réglages du système (Langue ou Synthèse vocale), puis recharge la page.');
+}
+
+function say(text, onend) {
+  if (!hasSpeech) { if (onend) onend(); return; }
   speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = 'fr-FR';
+  utter.lang = selectedVoice ? selectedVoice.lang : 'fr-FR';
   utter.rate = 0.9;
   if (selectedVoice) utter.voice = selectedVoice;
-  return utter;
+  if (onend) utter.onend = onend;
+  speechSynthesis.speak(utter);
 }
 
 function normalize(str) {
-  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[\u2019\u2018\u02bc`´]/g, "'").toLowerCase().trim();
 }
 
-function matches([, label, gender], term) {
-  if (term && !normalize(label).includes(term)) return false;
-  return !genderFilter || gender === genderFilter;
+function stripVS(str) {
+  return str.replace(/\uFE0F/g, '');
 }
 
-function render(filter = '') {
-  grid.innerHTML = '';
-  const term = normalize(filter);
+// Build every card once; filtering only toggles `hidden`
+const cards = emojis.map(([emoji, label, gender, english]) => {
+  const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'card';
+  card.dataset.label = label;
+  card.setAttribute('aria-label', `${label} — écouter`);
+  card.innerHTML = `<span class="emoji" aria-hidden="true">${emoji}</span><span class="label ${cls}">${label}</span><span class="eng">${english}</span>`;
+  return { card, gender, label: normalize(label), english: normalize(english), emoji: stripVS(emoji) };
+});
+
+const noResults = document.createElement('div');
+noResults.className = 'no-results';
+noResults.textContent = 'Aucun résultat trouvé';
+noResults.hidden = true;
+
+grid.append(...cards.map(c => c.card), noResults);
+
+function applyFilter() {
+  const term = normalize(searchInput.value);
   let count = 0;
 
-  for (const entry of emojis) {
-    if (!matches(entry, term)) continue;
-    const [emoji, label, gender, english] = entry;
-    count++;
-    const cls = gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other';
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<div class="emoji">${emoji}</div><div class="label ${cls}">${label}</div><div class="eng">${english}</div>`;
-    card.addEventListener('click', () => {
-      document.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
-      card.classList.add('speaking');
-      const utter = speak(label);
-      utter.onend = () => card.classList.remove('speaking');
-      speechSynthesis.speak(utter);
-    });
-    grid.appendChild(card);
+  const emojiTerm = stripVS(term);
+
+  for (const { card, gender, label, english, emoji } of cards) {
+    const textMatch = !term || label.includes(term) || english.includes(term) || emoji.includes(emojiTerm);
+    const show = textMatch && (!genderFilter || gender === genderFilter);
+    card.hidden = !show;
+    if (show) count++;
   }
 
-  if (count === 0) {
-    grid.innerHTML = '<div class="no-results">Aucun résultat trouvé</div>';
-  }
+  noResults.hidden = count > 0;
   randomBtn.disabled = count === 0;
 }
+
+grid.addEventListener('click', (e) => {
+  const card = e.target.closest('.card');
+  if (!card) return;
+  grid.querySelectorAll('.card.speaking').forEach(c => c.classList.remove('speaking'));
+  card.classList.add('speaking');
+  say(card.dataset.label, () => card.classList.remove('speaking'));
+});
 
 engToggle.addEventListener('change', (e) => {
   document.body.classList.toggle('show-english', e.target.checked);
@@ -392,15 +752,26 @@ engToggle.addEventListener('change', (e) => {
 genderRadios.forEach(radio => {
   radio.addEventListener('change', () => {
     genderFilter = radio.value;
-    render(searchInput.value);
+    applyFilter();
   });
 });
 
-speechSynthesis.onvoiceschanged = loadVoices;
-loadVoices();
+if (hasSpeech) {
+  speechSynthesis.addEventListener('voiceschanged', () => {
+    loadVoices();
+    if (speechSynthesis.getVoices().length) checkFrenchVoice();
+  });
+  loadVoices();
+  setTimeout(() => { loadVoices(); checkFrenchVoice(); }, 1500);
+} else {
+  showVoiceNotice('Ton navigateur ne prend pas en charge la synthèse vocale : la prononciation ne sera pas disponible.');
+}
 
-searchInput.addEventListener('input', e => render(e.target.value));
-render();
+let searchTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(applyFilter, 100);
+});
 
 // Random emoji dialog
 const randomDialog = document.getElementById('random-dialog');
@@ -412,7 +783,7 @@ const rdGender = document.getElementById('rd-gender');
 let lastRandom = null;
 
 function openRandomDialog() {
-  const pool = emojis.filter(e => matches(e, normalize(searchInput.value)));
+  const pool = emojis.filter((_, i) => !cards[i].card.hidden);
   if (!pool.length) return;
   let entry;
   do entry = pool[Math.floor(Math.random() * pool.length)];
@@ -420,6 +791,7 @@ function openRandomDialog() {
   lastRandom = entry;
   const [emoji, label, gender, english] = entry;
   rdEmoji.textContent = emoji;
+  rdEmoji.setAttribute('aria-label', `${label} — réécouter`);
   rdFrench.textContent = label;
   rdEnglish.textContent = english;
   if (gender === 'm') {
@@ -434,9 +806,9 @@ function openRandomDialog() {
     rdGender.textContent = '\u00A0';
     rdGender.style.visibility = 'hidden';
   }
-  rdEmoji.onclick = () => { speechSynthesis.speak(speak(label)); };
+  rdEmoji.onclick = () => say(label);
   if (!randomDialog.open) randomDialog.showModal();
-  speechSynthesis.speak(speak(label));
+  say(label);
 }
 
 randomBtn.addEventListener('click', openRandomDialog);

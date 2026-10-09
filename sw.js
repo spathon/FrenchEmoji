@@ -1,5 +1,6 @@
-const CACHE_NAME = 'fr-moji-v4';
-const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'fr-moji-v7';
+const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg',
+  './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(ASSETS)));
@@ -16,6 +17,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  const url = new URL(e.request.url);
+  // Leave non-GET and cross-origin requests (e.g. analytics) to the network
+  if (e.request.method !== 'GET' || url.origin !== self.location.origin) return;
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request).catch(() => caches.match(e.request))
@@ -24,8 +28,10 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       caches.match(e.request).then((cached) =>
         cached || fetch(e.request).then((resp) => {
-          const clone = resp.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+          if (resp.ok) {
+            const clone = resp.clone();
+            caches.open(CACHE_NAME).then((c) => c.put(e.request, clone));
+          }
           return resp;
         })
       )
