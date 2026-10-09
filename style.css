@@ -7,7 +7,7 @@ body {
 }
 header {
   background: linear-gradient(135deg, #0a1628 0%, #162544 30%, #1e3a6e 50%, #7c2d3c 70%, #a8324a 100%);
-  padding: 2.5rem 1rem 1.8rem;
+  padding: 2.5rem 1rem 1.4rem;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -362,7 +362,9 @@ body.show-english #random-dialog .rd-english {
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   border: 1px solid rgba(0,0,0,0.04);
   content-visibility: auto;
-  contain-intrinsic-size: auto 130px auto 110px;
+  /* Placeholder is the content box only (emoji + one-line label), not the whole card:
+     a bigger value makes unrendered rows taller than real ones and the page shrinks as you scroll */
+  contain-intrinsic-size: auto 120px auto 78px;
 }
 .card[hidden] { display: none; }
 .card:hover {
@@ -472,19 +474,61 @@ body.show-english .card .eng {
   .card .label { font-size: 0.75rem; }
   header h1 { font-size: 1.6rem; }
 }
-/* Progress: favourites / known */
-.toggle-bar { flex-wrap: wrap; }
-.seg-group label.fav-label:has(input:checked) {
-  background: rgba(255,200,60,0.3);
-  color: #ffe9a8;
-}
-.progress-line {
-  font-size: 0.75rem;
+/* Pill buttons on the filter row: "Masquer les appris" and ⚙️, same height as the segmented control */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 0.35rem 0.7rem;
+  font: inherit;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: rgba(255,255,255,0.55);
-  font-variant-numeric: tabular-nums;
+  line-height: normal;
+  white-space: nowrap;
+  cursor: pointer;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  transition: background 0.2s, color 0.2s;
 }
-.card-wrap { position: relative; display: grid; }
+.pill-btn:hover { color: #fff; background: rgba(255,255,255,0.18); }
+.pill-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.pill-btn[aria-pressed="true"] { background: rgba(255,255,255,0.9); border-color: #fff; color: #1a1a2e; }
+.settings-btn { align-self: stretch; padding: 0 0.55rem; font-size: 0.95rem; line-height: 1; }
+.known-count { opacity: 0.55; font-variant-numeric: tabular-nums; }
+.known-count:empty { display: none; }
+/* Settings popover (English, voice) */
+.settings {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-width: 220px;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 14px;
+  background: #fff;
+  color: #1a1a2e;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+}
+.settings:popover-open { display: grid; gap: 0.8rem; }
+.settings-row { display: grid; gap: 0.35rem; }
+.settings-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: #999; font-weight: 700; }
+.settings .toggle-label { color: #555; }
+.settings .toggle-label:has(input:checked) { color: #1a1a2e; }
+.settings .toggle-slider { background: rgba(0,0,0,0.15); }
+.settings .toggle-slider::after { background: #fff; }
+.settings .toggle-label input:checked + .toggle-slider { background: #1f9d55; }
+.settings .voice-radios { border-color: rgba(0,0,0,0.12); background: #fff; backdrop-filter: none; width: max-content; }
+.settings .voice-radios label { color: #555; border-right-color: rgba(0,0,0,0.08); }
+.settings .voice-radios label:hover { color: #1a1a2e; background: rgba(0,0,0,0.04); }
+.settings .voice-radios label:has(input:checked) { background: #1a1a2e; color: #fff; }
+.settings .voice-radios label:has(input:focus-visible) { outline-color: #1a4fc9; }
+/* min-width: 0 keeps a card from widening its grid column; emoji sequences measure wide until they render,
+   which otherwise shifts the whole page while scrolling */
+.card-wrap { position: relative; display: grid; min-width: 0; }
+.card-wrap .card { min-width: 0; overflow: hidden; }
 .card-wrap[hidden] { display: none; }
 .mark-btn {
   border: none;
@@ -544,51 +588,66 @@ body.show-english .card .eng {
 #random-dialog .mark-btn:hover { background: #e4e4e4; }
 #random-dialog .fav-btn[aria-pressed="true"] { background: rgba(255,200,60,0.25); }
 #random-dialog .known-btn[aria-pressed="true"] { background: #1f9d55; color: #fff; }
-/* Category chips */
-.cat-chips {
+/* Category strip: sticky row of icon chips that jump to sections, ⭐ Favoris filter at the right */
+.cat-strip {
+  position: sticky;
+  top: 0;
+  z-index: 20;
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.8rem;
+  /* Side padding grows on wide screens so the strip's content lines up with the 1200px grid */
+  padding: 0.45rem max(1rem, calc((100% - 1200px) / 2 + 1rem));
+  background: rgba(248,249,251,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.cat-chips {
+  position: relative;
+  flex: 1;
+  display: flex;
+  gap: 0.3rem;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 0.3rem 0.8rem;
-  margin: 0 -0.8rem;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
+  padding: 2px 1rem;
+  margin: -2px -1rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 1rem, #000 calc(100% - 1rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 1rem, #000 calc(100% - 1rem), transparent);
 }
 .cat-chips::-webkit-scrollbar { display: none; }
 .cat-chip {
   flex: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  border: 1.5px solid rgba(255,255,255,0.2);
+  gap: 0;
+  border: 1.5px solid rgba(0,0,0,0.12);
   border-radius: 999px;
-  padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+  padding: 0.3rem 0.5rem;
   font: inherit;
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  color: rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.1);
-  backdrop-filter: blur(8px);
+  color: #444;
+  background: #fff;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
-.cat-chip .cat-icon { font-size: 1rem; line-height: 1; }
-.cat-chip:hover {
-  color: #fff;
-  background: rgba(255,255,255,0.18);
-}
-.cat-chip:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
+.cat-chip .cat-icon { font-size: 1.15rem; line-height: 1; }
+.cat-chip > span:last-child { display: none; }
+.cat-chip:hover { color: #1a1a2e; background: rgba(0,0,0,0.05); }
+.cat-chip:focus-visible { outline: 2px solid #1a4fc9; outline-offset: 2px; }
 .cat-chip[aria-pressed="true"] {
-  background: #fff;
-  border-color: #fff;
-  color: #1a1a2e;
+  gap: 0.35rem;
+  padding-right: 0.75rem;
+  background: #1a1a2e;
+  border-color: #1a1a2e;
+  color: #fff;
 }
+.cat-chip[aria-pressed="true"] > span:last-child { display: inline; }
+.fav-chip { padding: 0.3rem 0.75rem; border-style: dashed; }
+.fav-chip[aria-pressed="true"] { background: #f5b400; border-color: #f5b400; color: #1a1a2e; }
 .cat-heading {
+  scroll-margin-top: 58px;
   grid-column: 1 / -1;
   font-size: 1.05rem;
   font-weight: 700;

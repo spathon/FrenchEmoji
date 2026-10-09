@@ -37,28 +37,37 @@
       <button class="random-btn" id="quiz-btn" title="Quiz" aria-label="Quiz">🎯</button>
     </div>
     <div class="toggle-bar">
-      <label class="toggle-label">
-        <input type="checkbox" id="eng-toggle">
-        <span class="toggle-slider"></span>
-        English
-      </label>
       <div class="seg-group">
         <label><input type="radio" name="gender" value="" checked><span>Tous</span></label>
         <label class="masc-label"><input type="radio" name="gender" value="m"><span>Masc</span></label>
         <label class="fem-label"><input type="radio" name="gender" value="f"><span>Fém</span></label>
       </div>
-      <div class="seg-group" id="progress-filter">
-        <label><input type="radio" name="progress" value="" checked><span>Tous</span></label>
-        <label class="fav-label"><input type="radio" name="progress" value="fav"><span>⭐ Favoris</span></label>
-        <label><input type="radio" name="progress" value="todo"><span>À apprendre</span></label>
-      </div>
-      <div id="voice-options"></div>
+      <button type="button" class="pill-btn" id="hide-known" aria-pressed="false">✓ Masquer les appris<span class="known-count" id="known-count" aria-live="polite"></span></button>
+      <button type="button" class="pill-btn settings-btn" id="settings-btn" popovertarget="settings" title="Réglages" aria-label="Réglages">⚙️</button>
     </div>
-    <div class="progress-line" id="progress-line" aria-live="polite"></div>
     <p class="voice-notice" id="voice-notice" role="status" hidden></p>
-    <div class="cat-chips" id="cat-chips" role="group" aria-label="Catégories"></div>
   </div>
 </header>
+
+<div popover id="settings" class="settings">
+  <div class="settings-row">
+    <div class="settings-label">Affichage</div>
+    <label class="toggle-label">
+      <input type="checkbox" id="eng-toggle">
+      <span class="toggle-slider"></span>
+      English
+    </label>
+  </div>
+  <div class="settings-row">
+    <div class="settings-label">Voix</div>
+    <div id="voice-options"></div>
+  </div>
+</div>
+
+<nav class="cat-strip" aria-label="Catégories">
+  <div class="cat-chips" id="cat-chips"></div>
+  <button type="button" class="cat-chip fav-chip" id="fav-chip" aria-pressed="false">⭐ Favoris</button>
+</nav>
 
 <dialog id="random-dialog">
   <button type="button" class="rd-emoji" id="rd-emoji"></button>
@@ -648,10 +657,14 @@ const engToggle = document.getElementById('eng-toggle');
 const genderRadios = document.querySelectorAll('input[name="gender"]');
 const randomBtn = document.getElementById('random-btn');
 const catChips = document.getElementById('cat-chips');
+const catStrip = document.querySelector('.cat-strip');
+const favChip = document.getElementById('fav-chip');
+const hideKnownBtn = document.getElementById('hide-known');
+const knownCount = document.getElementById('known-count');
 let selectedVoice = null;
 let genderFilter = '';
-let categoryFilter = '';
-let progressFilter = '';
+let favOnly = false;
+let hideKnown = false;
 
 // Progress (favourites / known words), stored per browser
 const PROGRESS_KEY = 'fr-moji-progress';
@@ -669,12 +682,12 @@ function saveProgress() {
   } catch (e) {}
 }
 
-const progressLine = document.getElementById('progress-line');
 const allEmojis = new Set(emojis.filter(Array.isArray).map(e => e[0]));
 function updateProgress() {
   let n = 0;
   known.forEach(e => { if (allEmojis.has(e)) n++; });
-  progressLine.textContent = `${n} / ${allEmojis.size} appris`;
+  knownCount.textContent = n ? `· ${n}` : '';
+  hideKnownBtn.title = `${n} / ${allEmojis.size} appris`;
 }
 
 function setMarkBtn(btn, type, on) {
@@ -854,8 +867,8 @@ function applyFilter() {
 
   for (const { entry, wrap, gender, category, label, english, emoji } of cards) {
     const textMatch = !term || label.includes(term) || english.includes(term) || emoji.includes(emojiTerm);
-    const show = textMatch && (!genderFilter || gender === genderFilter) && (!categoryFilter || category === categoryFilter)
-      && (progressFilter !== 'fav' || favs.has(entry.emoji)) && (progressFilter !== 'todo' || !known.has(entry.emoji));
+    const show = textMatch && (!genderFilter || gender === genderFilter)
+      && (!favOnly || favs.has(entry.emoji)) && (!hideKnown || !known.has(entry.emoji));
     wrap.hidden = !show;
     if (show) {
       count++;
@@ -865,7 +878,7 @@ function applyFilter() {
 
   for (const [name, heading] of headings) heading.hidden = !visibleCategories.has(name);
 
-  noResults.textContent = progressFilter === 'fav' && favs.size === 0
+  noResults.textContent = favOnly && favs.size === 0
     ? 'Aucun favori pour l’instant — touche ⭐ sur une carte'
     : 'Aucun résultat trouvé';
   noResults.hidden = count > 0;
@@ -891,32 +904,91 @@ genderRadios.forEach(radio => {
   });
 });
 
-document.querySelectorAll('input[name="progress"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    progressFilter = radio.value;
-    applyFilter();
-  });
+favChip.addEventListener('click', () => {
+  favOnly = !favOnly;
+  favChip.setAttribute('aria-pressed', String(favOnly));
+  applyFilter();
+});
+
+hideKnownBtn.addEventListener('click', () => {
+  hideKnown = !hideKnown;
+  hideKnownBtn.setAttribute('aria-pressed', String(hideKnown));
+  applyFilter();
 });
 
 updateProgress();
 
-// Category chips
-[{ name: '', icon: '✨', text: 'Toutes' }, ...categories].forEach(({ name, icon, text }) => {
+// Settings popover opens under its ⚙️ button and closes when the page scrolls away
+const settingsPop = document.getElementById('settings');
+const settingsBtn = document.getElementById('settings-btn');
+settingsPop.addEventListener('toggle', () => {
+  if (!settingsPop.matches(':popover-open')) return;
+  const r = settingsBtn.getBoundingClientRect();
+  const left = r.left + r.width / 2 - settingsPop.offsetWidth / 2;
+  settingsPop.style.top = `${r.bottom + 8}px`;
+  settingsPop.style.left = `${Math.max(8, Math.min(window.innerWidth - settingsPop.offsetWidth - 8, left))}px`;
+});
+
+// Category strip: icon chips that jump to their section; the section in view is highlighted
+const catList = [{ name: '', icon: '✨', text: 'Toutes' }, ...categories];
+const chips = catList.map(({ name, icon, text }, i) => {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'cat-chip';
-  btn.setAttribute('aria-pressed', String(name === categoryFilter));
+  btn.setAttribute('aria-pressed', String(i === 0));
   btn.innerHTML = `<span class="cat-icon" aria-hidden="true"></span><span></span>`;
   btn.firstChild.textContent = icon;
   btn.lastChild.textContent = text || name;
   btn.addEventListener('click', () => {
-    categoryFilter = name;
-    catChips.querySelectorAll('.cat-chip').forEach(c => c.setAttribute('aria-pressed', String(c === btn)));
-    btn.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-    applyFilter();
+    jumpTarget = i === 0 ? null : headings.get(name);
+    jumpTries = 0;
+    window.scrollTo({ top: jumpTarget ? headingTop(jumpTarget) : 0, behavior: 'smooth' });
   });
   catChips.appendChild(btn);
+  return btn;
 });
+
+const headingTop = (h) => h.getBoundingClientRect().top + window.scrollY - catStrip.offsetHeight - 12;
+
+// Rows below the fold are placeholders until rendered (content-visibility), so the page height moves a little
+// during a long smooth scroll. Once the scroll settles, nudge to where the heading actually ended up.
+let jumpTarget = null;
+let jumpTimer = 0;
+let jumpTries = 0;
+function settleJump() {
+  if (!jumpTarget) return;
+  const top = headingTop(jumpTarget);
+  if (Math.abs(top - window.scrollY) <= 1 || jumpTries++ > 5) { jumpTarget = null; return; }
+  window.scrollTo({ top, behavior: 'instant' });
+  // Rows render after the move and may shift the heading again, so check once more
+  clearTimeout(jumpTimer);
+  jumpTimer = setTimeout(settleJump, 120);
+}
+['wheel', 'touchstart', 'keydown'].forEach(ev => window.addEventListener(ev, () => { jumpTarget = null; }, { passive: true }));
+
+let stripRaf = 0;
+function updateActiveChip() {
+  stripRaf = 0;
+  const limit = catStrip.offsetHeight + 14; // 2px past the jump offset so a heading that just landed counts
+  let active = 0;
+  catList.forEach(({ name }, i) => {
+    if (i === 0) return;
+    const h = headings.get(name);
+    if (!h.hidden && h.getBoundingClientRect().top <= limit) active = i;
+  });
+  if (window.scrollY < 10) active = 0;
+  chips.forEach((c, i) => c.setAttribute('aria-pressed', String(i === active)));
+  // Keep the active chip in view by hand: scrollIntoView would cancel a smooth page scroll
+  const c = chips[active], l = c.offsetLeft, r = l + c.offsetWidth;
+  if (l < catChips.scrollLeft + 16) catChips.scrollLeft = l - 16;
+  else if (r > catChips.scrollLeft + catChips.clientWidth - 16) catChips.scrollLeft = r - catChips.clientWidth + 16;
+}
+window.addEventListener('scroll', () => {
+  if (settingsPop.matches(':popover-open')) settingsPop.hidePopover();
+  if (!stripRaf) stripRaf = requestAnimationFrame(updateActiveChip);
+  if (jumpTarget) { clearTimeout(jumpTimer); jumpTimer = setTimeout(settleJump, 150); }
+}, { passive: true });
+updateActiveChip();
 
 if (hasSpeech) {
   speechSynthesis.addEventListener('voiceschanged', () => {
@@ -1024,7 +1096,7 @@ function quizButton(html, cls, isRight) {
 
 function nextQuestion() {
   const ok = (e) => quizMode === 'listen' || isGendered(e);
-  let pool = cards.filter(c => !c.card.hidden).map(c => c.entry).filter(ok);
+  let pool = cards.filter(c => !c.wrap.hidden).map(c => c.entry).filter(ok);
   if (!pool.length) pool = entries.filter(ok);
   let entry = pick(pool);
   if (pool.length > 1 && entry === quizCurrent) entry = pick(pool.filter(e => e !== quizCurrent));
