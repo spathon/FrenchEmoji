@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fr-moji-v10';
+const CACHE_NAME = 'fr-moji-v11';
 const ASSETS = ['./', './index.html', './style.css', './manifest.json', './icon.svg',
   './apple-touch-icon.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
