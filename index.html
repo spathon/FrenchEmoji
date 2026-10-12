@@ -67,6 +67,7 @@
 <nav class="cat-strip" aria-label="Catégories">
   <div class="cat-chips" id="cat-chips"></div>
   <button type="button" class="cat-chip fav-chip" id="fav-chip" aria-pressed="false">⭐ Favoris</button>
+  <button type="button" class="cat-chip fav-chip review-chip" id="review-chip" aria-pressed="false">🔁 À réviser<span class="known-count" id="review-count" aria-live="polite"></span></button>
 </nav>
 
 <dialog id="random-dialog">
@@ -90,12 +91,20 @@
     <button data-mode="gender" aria-pressed="false">Le ou la ?</button>
   </div>
   <div class="qz-score" id="qz-score"></div>
-  <div class="qz-prompt" id="qz-prompt"></div>
-  <div class="qz-choices" id="qz-choices"></div>
-  <div class="qz-feedback" id="qz-feedback" aria-live="polite"></div>
+  <div id="qz-play">
+    <div class="qz-prompt" id="qz-prompt"></div>
+    <div class="qz-choices" id="qz-choices"></div>
+    <div class="qz-feedback" id="qz-feedback" aria-live="polite"></div>
+  </div>
+  <div class="qz-summary" id="qz-summary" hidden>
+    <div class="qz-summary-score" id="qz-summary-score"></div>
+    <div class="qz-summary-msg" id="qz-summary-msg"></div>
+    <div class="qz-missed" id="qz-missed"></div>
+  </div>
   <div class="rd-actions">
     <button class="rd-close" id="qz-close">Fermer</button>
     <button class="rd-another" id="qz-next" hidden>Suivant →</button>
+    <button class="rd-another" id="qz-again" hidden>🔁 Nouvelle partie</button>
   </div>
 </dialog>
 
@@ -659,35 +668,43 @@ const randomBtn = document.getElementById('random-btn');
 const catChips = document.getElementById('cat-chips');
 const catStrip = document.querySelector('.cat-strip');
 const favChip = document.getElementById('fav-chip');
+const reviewChip = document.getElementById('review-chip');
+const reviewCount = document.getElementById('review-count');
 const hideKnownBtn = document.getElementById('hide-known');
 const knownCount = document.getElementById('known-count');
 let selectedVoice = null;
 let genderFilter = '';
 let favOnly = false;
+let reviewOnly = false;
 let hideKnown = false;
 
-// Progress (favourites / known words), stored per browser
+// Progress (favourites / known words / words missed in the quiz), stored per browser
 const PROGRESS_KEY = 'fr-moji-progress';
 const favs = new Set();
 const known = new Set();
+const review = new Set();
 try {
   const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
   (saved.favs || []).forEach(e => favs.add(e));
   (saved.known || []).forEach(e => known.add(e));
+  (saved.review || []).forEach(e => review.add(e));
 } catch (e) {}
 
 function saveProgress() {
   try {
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ favs: [...favs], known: [...known] }));
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify({ favs: [...favs], known: [...known], review: [...review] }));
   } catch (e) {}
 }
 
 const allEmojis = new Set(emojis.filter(Array.isArray).map(e => e[0]));
+const countIn = (set) => { let n = 0; set.forEach(e => { if (allEmojis.has(e)) n++; }); return n; };
 function updateProgress() {
-  let n = 0;
-  known.forEach(e => { if (allEmojis.has(e)) n++; });
+  const n = countIn(known);
   knownCount.textContent = n ? `· ${n}` : '';
   hideKnownBtn.title = `${n} / ${allEmojis.size} appris`;
+  const r = countIn(review);
+  reviewCount.textContent = r ? `· ${r}` : '';
+  reviewChip.title = r ? `${r} mot${r > 1 ? 's' : ''} raté${r > 1 ? 's' : ''} au quiz` : 'Les mots ratés au quiz apparaissent ici';
 }
 
 function setMarkBtn(btn, type, on) {
@@ -702,6 +719,7 @@ function setMarkBtn(btn, type, on) {
 function toggleMark(emoji, type) {
   const set = type === 'fav' ? favs : known;
   if (set.has(emoji)) set.delete(emoji); else set.add(emoji);
+  if (type === 'known' && known.has(emoji)) review.delete(emoji);
   saveProgress();
   updateProgress();
   syncMarks(emoji);
@@ -711,7 +729,9 @@ function toggleMark(emoji, type) {
 function syncMarks(emoji) {
   document.querySelectorAll('[data-emoji]').forEach(el => {
     if (el.dataset.emoji !== emoji) return;
-    el.querySelector('.card')?.classList.toggle('known', known.has(emoji));
+    const card = el.querySelector('.card');
+    card?.classList.toggle('known', known.has(emoji));
+    card?.classList.toggle('review', review.has(emoji));
     el.querySelectorAll('.mark-btn').forEach(b => setMarkBtn(b, b.dataset.type, (b.dataset.type === 'fav' ? favs : known).has(emoji)));
   });
 }
@@ -841,6 +861,7 @@ const cards = entries.map((entry) => {
   card.setAttribute('aria-label', `${label} — écouter`);
   card.innerHTML = `<span class="emoji" aria-hidden="true">${emoji}</span><span class="label ${cls}">${label}</span><span class="eng">${english}</span>`;
   card.classList.toggle('known', known.has(emoji));
+  card.classList.toggle('review', review.has(emoji));
   // Mark buttons sit beside the card button, since buttons can't nest
   const wrap = document.createElement('div');
   wrap.className = 'card-wrap';
@@ -868,7 +889,8 @@ function applyFilter() {
   for (const { entry, wrap, gender, category, label, english, emoji } of cards) {
     const textMatch = !term || label.includes(term) || english.includes(term) || emoji.includes(emojiTerm);
     const show = textMatch && (!genderFilter || gender === genderFilter)
-      && (!favOnly || favs.has(entry.emoji)) && (!hideKnown || !known.has(entry.emoji));
+      && (!favOnly || favs.has(entry.emoji)) && (!reviewOnly || review.has(entry.emoji))
+      && (!hideKnown || !known.has(entry.emoji));
     wrap.hidden = !show;
     if (show) {
       count++;
@@ -880,7 +902,9 @@ function applyFilter() {
 
   noResults.textContent = favOnly && favs.size === 0
     ? 'Aucun favori pour l’instant — touche ⭐ sur une carte'
-    : 'Aucun résultat trouvé';
+    : reviewOnly && review.size === 0
+      ? 'Rien à réviser pour l’instant — les mots ratés au quiz 🎯 apparaîtront ici'
+      : 'Aucun résultat trouvé';
   noResults.hidden = count > 0;
   randomBtn.disabled = count === 0;
 }
@@ -904,10 +928,21 @@ genderRadios.forEach(radio => {
   });
 });
 
+// Favourites and review are two views of the same strip, so only one is on at a time
+function setListChips() {
+  favChip.setAttribute('aria-pressed', String(favOnly));
+  reviewChip.setAttribute('aria-pressed', String(reviewOnly));
+  applyFilter();
+}
 favChip.addEventListener('click', () => {
   favOnly = !favOnly;
-  favChip.setAttribute('aria-pressed', String(favOnly));
-  applyFilter();
+  if (favOnly) reviewOnly = false;
+  setListChips();
+});
+reviewChip.addEventListener('click', () => {
+  reviewOnly = !reviewOnly;
+  if (reviewOnly) favOnly = false;
+  setListChips();
 });
 
 hideKnownBtn.addEventListener('click', () => {
@@ -1072,16 +1107,93 @@ const qzChoices = document.getElementById('qz-choices');
 const qzFeedback = document.getElementById('qz-feedback');
 const qzScore = document.getElementById('qz-score');
 const qzNext = document.getElementById('qz-next');
+const qzAgain = document.getElementById('qz-again');
+const qzPlay = document.getElementById('qz-play');
+const qzSummary = document.getElementById('qz-summary');
+const qzSummaryScore = document.getElementById('qz-summary-score');
+const qzSummaryMsg = document.getElementById('qz-summary-msg');
+const qzMissed = document.getElementById('qz-missed');
 const ARTICLE = /^(le |la |les |l'|l’)/i;
-let quizMode = 'listen', quizCurrent = null, score = 0, total = 0, streak = 0;
+// Plural labels ("les frites") don't show the gender, so they stay out of the le/la quiz
+const SINGULAR_ARTICLE = /^(le |la |l'|l’)/i;
+const ROUND = 10;
+const QUIZ_KEY = 'fr-moji-quiz';
+let quizMode = 'listen', quizQueue = [], quizIndex = 0, quizCurrent = null, score = 0, streak = 0, missed = [];
+let best = {};
+try { best = JSON.parse(store.get(QUIZ_KEY) || '{}') || {}; } catch (e) {}
 
 const canSpeak = () => hasSpeech && speechSynthesis.getVoices().length > 0;
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = (arr) => arr.map(v => [Math.random(), v]).sort((a, b) => a[0] - b[0]).map(v => v[1]);
-const isGendered = (e) => (e.gender === 'm' || e.gender === 'f') && ARTICLE.test(e.label);
+const isGendered = (e) => (e.gender === 'm' || e.gender === 'f') && SINGULAR_ARTICLE.test(e.label);
+
+// Words the quiz can ask: what the grid currently shows, or everything when the filter hides it all
+function quizPool() {
+  const ok = (e) => quizMode === 'listen' || isGendered(e);
+  const pool = cards.filter(c => !c.wrap.hidden).map(c => c.entry).filter(ok);
+  return pool.length ? pool : entries.filter(ok);
+}
+
+// A round of up to 10 different words: missed words first, then words not yet known, then the rest
+function startRound() {
+  const tiers = [[], [], []];
+  for (const e of shuffle(quizPool())) tiers[review.has(e.emoji) ? 0 : known.has(e.emoji) ? 2 : 1].push(e);
+  quizQueue = tiers.flat().slice(0, ROUND);
+  quizIndex = 0; score = 0; streak = 0; missed = [];
+  qzSummary.hidden = true;
+  qzAgain.hidden = true;
+  qzPlay.hidden = false;
+  nextQuestion();
+}
 
 function updateScore() {
-  qzScore.textContent = `Score : ${score} / ${total} · Série : ${streak}${streak >= 3 ? ' 🔥' : ''}`;
+  qzScore.textContent = `Question ${Math.min(quizIndex + 1, quizQueue.length)} / ${quizQueue.length} · Score : ${score} · Série : ${streak}${streak >= 3 ? ' 🔥' : ''}`;
+}
+
+function showSummary() {
+  const len = quizQueue.length;
+  qzPlay.hidden = true;
+  qzNext.hidden = true;
+  qzSummary.hidden = false;
+  qzAgain.hidden = false;
+  qzSummaryScore.textContent = `${score} / ${len}`;
+  let msg = score === len ? '🏆 Sans faute !' : score >= len * 0.7 ? '👏 Bien joué !' : '💪 Continue, ça vient !';
+  // Only full rounds compete for the record, so a 3-question round can't set a 3 / 3 best
+  if (len === ROUND) {
+    const prev = best[quizMode];
+    if (prev === undefined || score > prev) {
+      best[quizMode] = score;
+      store.set(QUIZ_KEY, JSON.stringify(best));
+      if (prev !== undefined) msg += ' · Nouveau record !';
+    } else {
+      msg += ` · Record : ${prev} / ${ROUND}`;
+    }
+  }
+  qzSummaryMsg.textContent = msg;
+  qzMissed.innerHTML = '';
+  if (missed.length) {
+    const title = document.createElement('div');
+    title.className = 'qz-missed-title';
+    title.textContent = 'À réviser';
+    qzMissed.appendChild(title);
+    for (const { emoji, label, gender } of missed) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'qz-missed-word';
+      b.innerHTML = `<span aria-hidden="true"></span><span class="${gender === 'm' ? 'masc' : gender === 'f' ? 'fem' : 'other'}"></span>`;
+      b.firstChild.textContent = emoji;
+      b.lastChild.textContent = label;
+      b.setAttribute('aria-label', `${label} — écouter`);
+      b.addEventListener('click', () => say(label));
+      qzMissed.appendChild(b);
+    }
+  } else {
+    const none = document.createElement('div');
+    none.className = 'qz-missed-title';
+    none.textContent = 'Aucun mot raté 🎉';
+    qzMissed.appendChild(none);
+  }
+  qzAgain.focus();
 }
 
 function quizButton(html, cls, isRight) {
@@ -1095,18 +1207,16 @@ function quizButton(html, cls, isRight) {
 }
 
 function nextQuestion() {
-  const ok = (e) => quizMode === 'listen' || isGendered(e);
-  let pool = cards.filter(c => !c.wrap.hidden).map(c => c.entry).filter(ok);
-  if (!pool.length) pool = entries.filter(ok);
-  let entry = pick(pool);
-  if (pool.length > 1 && entry === quizCurrent) entry = pick(pool.filter(e => e !== quizCurrent));
+  const entry = quizQueue[quizIndex];
   quizCurrent = entry;
   const { emoji, label, gender } = entry;
   qzChoices.innerHTML = '';
   qzFeedback.innerHTML = '';
   qzNext.hidden = true;
+  qzNext.textContent = quizIndex + 1 < quizQueue.length ? 'Suivant →' : 'Résultat →';
   qzChoices.className = 'qz-choices ' + quizMode;
   if (quizMode === 'listen') {
+    const pool = quizPool();
     const opts = [entry];
     for (const e of shuffle(pool.length >= 4 ? pool : entries)) {
       if (opts.length === 4) break;
@@ -1133,10 +1243,25 @@ function nextQuestion() {
 
 function answerQuiz(btn) {
   if (!qzNext.hidden) return;
-  const { label, gender, english } = quizCurrent;
+  const { emoji, label, gender, english } = quizCurrent;
   const ok = btn.dataset.right === '1';
-  total++;
   if (ok) { score++; streak++; } else streak = 0;
+  // A miss puts the word in the review list (and takes back a "known" mark); a hit clears it
+  let changed = false;
+  if (ok) {
+    changed = review.delete(emoji);
+  } else {
+    missed.push(quizCurrent);
+    review.add(emoji);
+    known.delete(emoji);
+    changed = true;
+  }
+  if (changed) {
+    saveProgress();
+    updateProgress();
+    syncMarks(emoji);
+    applyFilter();
+  }
   qzChoices.querySelectorAll('button').forEach(b => {
     b.disabled = true;
     if (b.dataset.right) b.classList.add('correct');
@@ -1153,15 +1278,20 @@ function answerQuiz(btn) {
 }
 
 quizDialog.querySelectorAll('.qz-tabs button').forEach(b => b.addEventListener('click', () => {
+  if (quizMode === b.dataset.mode) return;
   quizMode = b.dataset.mode;
   quizDialog.querySelectorAll('.qz-tabs button').forEach(t => t.setAttribute('aria-pressed', t === b));
-  nextQuestion();
+  startRound();
 }));
 document.getElementById('quiz-btn').addEventListener('click', () => {
   quizDialog.showModal();
-  nextQuestion();
+  startRound();
 });
-qzNext.addEventListener('click', nextQuestion);
+qzNext.addEventListener('click', () => {
+  quizIndex++;
+  if (quizIndex < quizQueue.length) nextQuestion(); else showSummary();
+});
+qzAgain.addEventListener('click', startRound);
 document.getElementById('qz-close').addEventListener('click', () => quizDialog.close());
 quizDialog.addEventListener('click', (e) => {
   if (e.target === quizDialog) quizDialog.close();
