@@ -202,9 +202,9 @@ body.show-english #random-dialog .rd-english {
 #quiz-dialog { max-width: 360px; padding: 1.5rem 1.25rem; }
 #quiz-dialog button { font-family: inherit; }
 #quiz-dialog button:focus-visible { outline: 3px solid #1a4fc9; outline-offset: 2px; }
-.qz-tabs { display: inline-flex; background: #f0f0f0; border-radius: 12px; padding: 3px; }
+.qz-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #f0f0f0; border-radius: 12px; padding: 3px; }
 .qz-tabs button {
-  border: none; background: transparent; border-radius: 10px; padding: 0.45rem 0.9rem;
+  border: none; background: transparent; border-radius: 10px; padding: 0.45rem 0.5rem;
   font-size: 0.85rem; font-weight: 600; color: #666; cursor: pointer; transition: background 0.2s;
 }
 .qz-tabs button[aria-pressed="true"] { background: #fff; color: #1a1a2e; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
@@ -225,6 +225,23 @@ body.show-english #random-dialog .rd-english {
 .qz-choices button:not(:disabled):active { transform: scale(0.95); }
 .qz-emoji { font-size: 2.8rem; line-height: 1.2; padding: 0.5rem 0; background: #f4f5f8; }
 .qz-emoji:not(:disabled):hover { background: #e9ebf1; }
+.qz-text { padding: 0.7rem 0.5rem; font-size: 0.95rem; font-weight: 700; line-height: 1.25; color: #1a1a2e; background: #f4f5f8; }
+.qz-text:not(:disabled):hover { background: #e9ebf1; }
+.qz-hint { font-size: 0.85rem; color: #999; }
+.qz-choices.spell { grid-template-columns: 1fr; }
+.qz-spell { display: flex; gap: 0.5rem; min-width: 0; }
+.qz-spell input {
+  flex: 1; width: 100%; min-width: 0; font: inherit; font-size: 1rem; padding: 0.6rem 0.8rem;
+  border: 2px solid rgba(0,0,0,0.12); border-radius: 12px; background: #fff; color: #1a1a2e;
+}
+.qz-spell input:focus { outline: none; border-color: #1a4fc9; }
+.qz-spell input.correct { border-color: #1f9d55; background: rgba(31,157,85,0.08); }
+.qz-spell input.wrong { border-color: #d42a42; color: #888; text-decoration: line-through; }
+.qz-spell button {
+  border: none; border-radius: 12px; padding: 0.6rem 0.9rem; font-size: 0.9rem; font-weight: 700;
+  background: #1a4fc9; color: #fff; cursor: pointer;
+}
+.qz-spell button:disabled { opacity: 0.4; cursor: default; }
 .qz-gender { padding: 0.8rem 0.5rem; font-size: 1rem; font-weight: 700; color: #fff; }
 .qz-gender.masc { background: #1a4fc9; }
 .qz-gender.fem { background: #d42a42; }
@@ -667,6 +684,10 @@ body.show-english .card .eng {
 .review-chip .known-count { margin-left: 0.3rem; }
 .card.review { border-color: rgba(232,113,26,0.55); background: #fff8f2; }
 .cat-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
   scroll-margin-top: 58px;
   grid-column: 1 / -1;
   font-size: 1.05rem;
@@ -677,3 +698,10 @@ body.show-english .card .eng {
   border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 .cat-heading:first-child { margin-top: 0; }
+.cat-progress {
+  display: inline-flex; align-items: center; gap: 0.45rem; flex: none;
+  font-size: 0.72rem; font-weight: 600; color: #999; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.cat-bar { width: 64px; height: 5px; border-radius: 3px; background: rgba(0,0,0,0.08); overflow: hidden; }
+.cat-bar-fill { display: block; height: 100%; width: 0; background: #1f9d55; border-radius: 3px; transition: width 0.3s; }
+.cat-heading.done .cat-progress { color: #1f9d55; }
